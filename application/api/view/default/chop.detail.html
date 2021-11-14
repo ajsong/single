@@ -1,0 +1,192 @@
+{include file="header.html"}
+<body {if strtolower($data.client->navigation_bgcolor)=='#fff' || strtolower($data.client->navigation_bgcolor)=='#ffffff' || strtolower($data.client->navigation_bgcolor)=='#ecc360'}class="gr"{else}style="background-color:{$data.client->navigation_bgcolor};"{/if}>
+
+<div class="navBar">
+	<a class="left" href="/wap/?app=member&act=index"><i class="return"></i></a>
+	<div class="titleView-x">一起砍价</div>
+</div>
+
+<div class="chop-detail">
+	<div class="main">
+		<a class="rule" href="javascript:void(0)">活动规则</a>
+		<div class="goodsView status{$data.order->chop_status}">
+			<div class="member"><i {if strlen($data.order->member->avatar)}style="background-image:url({$data.order->member->avatar});"{/if}></i>{$data.order->member->name}</div>
+			<a href="/wap/?app=goods&act=detail&id={$data.order->order_goods->id}" class="goods">
+				<div class="pic" {if strlen($data.order->order_goods->pic)}style="background-image:url({$data.order->order_goods->pic});"{/if}></div>
+				<div class="name">{$data.order->order_goods->name}</div>
+				<div class="origin_price">原价：￥{number_format($data.order->order_goods->price,2,'.','')}</div>
+				<div class="price">底价：<span>￥{number_format($data.order->order_goods->chop_price,2,'.','')}</span></div>
+				<div class="time status{$data.order->chop_status}"><font>剩余时间：<span>00:00:00</span></font></div>
+				{if $data.order->chop_status==0}
+				<input type="hidden" id="now" value="{$data.order->order_goods->chop_now}" />
+				<input type="hidden" id="countdown" value="{$data.order->order_goods->chop_end_time}" />
+				{/if}
+			</a>
+		</div>
+		<div class="progressView">
+			<div class="progress"><span style="width:{number_format(($data.order->order_goods->chop_price-$data.order->order_goods->remain_price)/$data.order->order_goods->chop_price*100,1,'.','')}%;"></span></div>
+			<div class="info">
+				<font>还差：{number_format($data.order->order_goods->remain_price,2,'.','')}元</font>
+				<span>已砍：{number_format($data.order->order_goods->chop_price-$data.order->order_goods->remain_price,2,'.','')}元</span>
+			</div>
+		</div>
+		<div class="btnView">
+			{if $data.order->owner==1}
+				{if $data.order->chop_status==1}
+				<a class="btn" href="javascript:callpay()">立即购买</a>
+				{else if $data.order->chop_status==-1}
+				<a class="btn" href="/wap/?app=goods&act=detail&id={$data.order->order_goods->id}">重砍一个</a>
+				{else}
+				<a class="btn share" href="javascript:void(0)">呼朋唤友来砍价</a>
+				{/if}
+			{else}
+				{if $data.order->chop_status==0}
+				<a class="btn cut" href="javascript:void(0)">帮TA砍一刀</a>
+				<a class="btn" href="/wap/?app=goods&act=detail&id={$data.order->order_goods->id}">我也参加</a>
+				{else}
+				<a class="btn" href="/wap/?app=goods&act=detail&id={$data.order->order_goods->id}">我也砍一个</a>
+				{/if}
+			{/if}
+		</div>
+		<div class="list">
+			<div class="ge-bottom">已有{count($data.order->member_list)-1}位小伙伴帮忙砍价</div>
+			<ul class="clear-after">
+				{foreach from=$data.order->member_list item=g key=i}
+				<li class="ge-bottom">
+					<i {if strlen($g->avatar)}style="background-image:url({$g->avatar});"{/if}></i>
+					<font>砍掉<strong>{number_format($g->price,2,'.','')}</strong>元</font>
+					<span><div>{$g->name}</div><strong>{$g->memo}</strong></span>
+				</li>
+				{/foreach}
+			</ul>
+		</div>
+	</div>
+</div>
+
+<div class="share-mark" style="display:none;"></div>
+
+<div class="chop-alert clear-after ruleView hidden" no-close="true">
+	<a class="close" href="javascript:void(0)">╳</a>
+	<h5 class="ge-bottom"><span>砍价规则</span></h5>
+	<div>1.邀请好友一起砍价，看到最低价格即可购买商品；</div>
+	<div>2.对于同一个砍价，您只能帮助砍价一次；</div>
+	<div>3.每次金额随机，参与好友越多越容易成功；</div>
+	<div>4.砍价完成后，需要在砍价活动结束前支付，逾期失效。</div>
+</div>
+
+{if $data.order->order_goods->readed==0}
+<div class="chop-alert clear-after alertView hidden" no-close="true">
+	<a class="close" href="javascript:void(0)">╳</a>
+	<div class="member">恭喜你第一刀砍掉一半！</div>
+	<div class="price">成功砍掉 <span>{number_format($data.order->order_goods->chop_price-$data.order->order_goods->remain_price,2,'.','')}</span> 元</div>
+	<a class="btn share" href="javascript:void(0)">呼朋唤友来砍价</a>
+</div>
+{else}
+<div class="chop-alert clear-after alertView hidden" no-close="true">
+	<a class="close" href="javascript:void(0)">╳</a>
+	<div class="member"></div>
+	<div class="price">成功帮TA砍掉 <span>0.00</span> 元</div>
+	<a class="btn" href="/wap/?app=goods&act=detail&id={$data.order->order_goods->id}">我也来参加</a>
+</div>
+{/if}
+
+{include file="footer.html"}
+<script>
+$(function(){
+	/*{if $data.order->order_goods->readed==0}*/
+	setTimeout(function(){ $.overlay('.alertView') }, 1000);
+	/*{/if}*/
+	$('.rule').click(function(){
+		$.overlay('.ruleView');
+	});
+	$('.chop-alert .close').click(function(){
+		$.overlay(false);
+	});
+	
+	/*{if $data.order->chop_status==0}*/
+	$('.share').click(function(){
+		if($('.load-face').length){
+			$.overlay(false);
+			setTimeout(function(){ $.shareMark() }, 400);
+		}else{
+			$.shareMark();
+		}
+	});
+	
+	if($('#countdown').length){
+		var countdown = Number($('#countdown').val()), now = Number($('#now').val()),
+			countdownFn = function(){
+				var result = countdown - now, r = result;
+				if(result<=0){
+					$('.goodsView .time span').html('00:00:00');
+					clearInterval(timer);
+					timer = null;
+					location.href = location.href;
+					return;
+				}
+				var day = Math.floor(r/(60*60*24));
+				r = result - day*60*60*24;
+				var hour = Math.floor(r/(60*60));
+				r -= hour*60*60;
+				var minute = Math.floor(r/60);
+				r -= minute*60;
+				var second = r;
+				$('.goodsView .time span').html($.fillZero(hour,2)+':'+$.fillZero(minute,2)+':'+$.fillZero(second,2));
+				now += 1;
+			},
+			timer = setInterval(countdownFn, 1000);
+		countdownFn();
+	}
+	
+	$('.cut').click(function(){
+		$.overload();
+		$.postJSON('/api/?app=chop&act=cut', { order_sn:'{$data.order->order_sn}' }, function(json){
+			if(json.error!=0){ $.overloadError(json.msg);return }
+			$('.alertView .member').html('<i '+(json.data.avatar.length?'style="background-image:url('+json.data.avatar+');"':'')+'></i>'+json.data.memo);
+			$('.alertView .price span').html(json.data.price.numberFormat(2));
+			$('body').append('<div class="chop-cut hidden" no-close="true"></div>');
+			$.overlay('.chop-cut', 0, function(){
+				var _this = this.addClass('this');
+				setTimeout(function(){
+					_this.removeClass('this');
+					setTimeout(function(){
+						$.overlay('.alertView');
+						setTimeout(function(){ $('.chop-cut').remove() }, 500);
+					}, 2000);
+				}, 200);
+			});
+		});
+	});
+	/*{/if}*/
+});
+
+/*{if $data.order->owner==1 && $data.order->status==0 && $data.order->chop_status==1}*/
+//调用微信JS api 支付
+function jsApiCall(){
+	WeixinJSBridge.invoke(
+		'getBrandWCPayRequest',
+		{$data.jsApiParameters},
+		function(res){
+			WeixinJSBridge.log(res.err_msg);
+			if(res.err_msg=='get_brand_wcpay_request:ok'){
+				location.href = '/wap/?app=cart&act=order_complete&order_sn={$order_sn}';
+			}
+		}
+	);
+}
+
+function callpay(){
+	if(!$.checklogin())return;
+	if (typeof WeixinJSBridge == 'undefined'){
+		if( document.addEventListener ){
+			document.addEventListener('WeixinJSBridgeReady', jsApiCall, false);
+		}else if (document.attachEvent){
+			document.attachEvent('WeixinJSBridgeReady', jsApiCall);
+			document.attachEvent('onWeixinJSBridgeReady', jsApiCall);
+		}
+	}else{
+		jsApiCall();
+	}
+}
+/*{/if}*/
+</script>

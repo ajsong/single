@@ -1,0 +1,214 @@
+{include file="header.html"}
+<body class="gr">
+
+<div class="navBar">
+	<a class="left" href="javascript:history.back()"><i class="return"></i></a>
+	<div class="titleView-x">发表攻略</div>
+</div>
+
+<form action="/api/?app=article&act=add" method="post">
+<input type="hidden" name="gourl" value="/wap/?app=article&act=index" />
+<input type="hidden" name="goalert" value="提交成功" />
+<div class="discover-edit main-bottom">
+	<div class="view ge-bottom ge-light">
+		<div class="picView">
+			<a class="plus" href="javascript:void(0)"></a>
+		</div>
+		<div class="tip"><span>提示：请上传攻略图片</span></div>
+	</div>
+	
+	<div class="view ge-bottom ge-light">
+		<div class="title">
+			<font>标题</font>
+			<input type="text" name="title" id="title" placeholder="请输入标题" />
+		</div>
+	</div>
+	
+	<div class="view">
+		<a class="goods push-ico" href="/wap/?tpl=search">添加关联商品</a>
+	</div>
+	<ul class="view goodsView"></ul>
+	
+	<div class="view con ge-top ge-light">
+		攻略内容
+	</div>
+	<div class="view">
+		<div class="content">
+			<textarea name="content" id="content" placeholder="请输入攻略内容"></textarea>
+		</div>
+	</div>
+	
+	<a class="btn" href="javascript:void(0)">发表</a>
+</div>
+<input type="hidden" name="pics" id="pics" />
+<input type="hidden" name="goods" id="goods" />
+</form>
+
+{include file="footer.html"}
+<script>
+var maxCount = 3, images = [];
+$(function(){
+	$('.plus').ajaxupload({
+		url : '/api/?app=article&act=upload_pic',
+		name : 'pic',
+		before : function(){
+			if(images.length>=maxCount){
+				$.overloadWarning('最多只能选择'+maxCount+'张');
+				return false;
+			}
+			$.overload();
+		},
+		callback : {
+			success : function(json){
+				images.push(json.data);
+				var image = $('<a href="javascript:void(0)" url="'+json.data+'"></a>');
+				$('.plus').before(image);
+				image.loadbackground();
+			}
+		}
+	});
+	$('.btn').click(function(){
+		if(!images.length){
+			//$.overloadError('请选择攻略图片');
+			//return false;
+		}
+		if(!$('#title').val().length){
+			$.overloadError('请输入标题');
+			return false;
+		}
+		if(!$('#content').val().length){
+			$.overloadError('请输入攻略内容');
+			return false;
+		}
+		$('#pics').val($.jsonString(images));
+		if($('.goodsView').children().length){
+			var goods = [];
+			$('.goodsView').children().each(function(){
+				goods.push($(this).attr('gid'));
+			});
+			$('#goods').val($.jsonString(goods));
+		}
+		$('form').submit();
+	});
+	pushBodyView('.goods', function(bodyView, _link, delegate){
+		var offset = bodyView.find('.pullRefresh .list > li').length;
+		function createHtml(g){
+			var html = '<li>\
+				<a href="/wap/?app=goods&act=detail&id='+g.id+'">\
+					<div class="pic" style="background-image:url('+g.pic+');"></div>\
+					<div class="title"><div>'+g.name+'</div><font></font><span><strong>￥</strong>'+g.price.numberFormat(2)+'</span></div>\
+				</a>\
+			</li>';
+			offset++;
+			html = $(html);
+			html.find('a').data('data', g);
+			return html;
+		}
+		function setLists(){
+			var width = Math.floor((bodyView.find('.pullRefresh').width()-4) / 2);
+			bodyView.find('.list li').width(width);
+			bodyView.find('.list a .pic').loadbackground();
+		}
+		function clickRight(){
+			var val = bodyView.find('#keyword').val();
+			if(!val.length){
+				//$.overloadError('请输入关键字');
+				//return;
+			}
+			bodyView.addClass('gr');
+			bodyView.find('.searchHistory').hide();
+			bodyView.find('.pullRefresh').pullRefresh().headerBegin();
+		}
+		function bindDelegate(){
+			bodyView.find('.pullRefresh a').each(function(){
+				var _this = $(this);
+				if(!!_this.data('delegate'))return true;
+				_this.data('delegate', true).data('hasClick', true).click(function(){
+					var g = $(this).data('data'), goodsView = delegate.find('.goodsView');
+					var row = $('<li gid="'+g.id+'">\
+						<div class="row">\
+							<a class="cl" href="javascript:void(0)"><span>－</span></a>\
+							<a class="bo" href="/wap/?app=goods&act=detail&id='+g.id+'">\
+								<div class="pic" style="background-image:url('+g.pic+');"></div>\
+								<div class="name">'+g.name+'</div>\
+								<div class="price">￥'+g.price+'</div>\
+							</a>\
+						</div>\
+					</li>');
+					row.find('.cl').click(function(){
+						var cl = $(this).parent().parent();
+						cl.animate({ height:0 }, 200, function(){
+							cl.remove();
+						});
+					});
+					goodsView.append(row);
+					popBodyView();
+					return false;
+				});
+			});
+		}
+		setLists();
+		bodyView.find('.navBar .right').click(clickRight);
+		$.getJSON('/api/?app=home&act=search_history', function(json){
+			var html = '';
+			if(!$.isArray(json.data)){
+				bodyView.find('.searchHistory .title a').hide();
+				html += '<li class="norecord">暂无搜索历史</li>';
+			}else{
+				for(var i=0; i<json.data.length; i++){
+					html += '<li><a href="javascript:void(0)">'+json.data[i].content+'</a></li>';
+				}
+			}
+			bodyView.find('.searchHistory .list').html(html);
+			bodyView.find('.searchHistory .list a').click(function(){
+				bodyView.find('#keyword').val($(this).html());
+				clickRight();
+			});
+		});
+		bodyView.find('.searchHistory .title a').click(function(){
+			var _this = $(this);
+			$.getJSON('/api/?app=home&act=clear_search_history', function(json){
+				_this.hide();
+				var html = '<li class="norecord">暂无搜索历史</li>';
+				bodyView.find('.searchHistory .list').html(html);
+			});
+		});
+		bodyView.find('.pullRefresh').pullRefresh({
+			header : true,
+			footer : true,
+			footerNoMoreText : '- END -',
+			refresh : function(fn){
+				var _this = this;
+				offset = 0;
+				$.getJSON('/api/?app=goods&act=index&keyword='+bodyView.find('#keyword').val(), function(json){
+					if(json.error!=0){ $.overloadError(json.msg);return }
+					_this.find('.list').html('');
+					if($.isArray(json.data.goods))for(var i=0; i<json.data.goods.length; i++){
+						var html = createHtml(json.data.goods[i]);
+						_this.find('.list').append(html);
+					}
+					setLists();
+					bindDelegate();
+					fn();
+				});
+			},
+			load : function(fn){
+				var _this = this;
+				$.getJSON('/api/?app=goods&act=index&keyword='+bodyView.find('#keyword').val(), { offset:offset }, function(json){
+					if(json.error!=0){ $.overloadError(json.msg);return }
+					if($.isArray(json.data.goods))for(var i=0; i<json.data.goods.length; i++){
+						var html = createHtml(json.data.goods[i]);
+						_this.find('.list').append(html);
+					}
+					setLists();
+					bindDelegate();
+					fn();
+				});
+			}
+		});
+		bodyView.find('#keyword').onkey(function(code){
+			if(code==13)clickRight();
+		});
+	});
+});
+</script>

@@ -1,0 +1,59 @@
+{include file="header.html"}
+
+<div class="page-header">
+	<h6>
+		商家管理
+		<small>
+			<i class="ace-icon fa fa-angle-double-right"></i>
+			申请商家列表
+		</small>
+	</h6>
+</div>
+
+<div class="table-content">
+<table id="simple-table" class="table table-striped table-bordered table-hover">
+	<thead>
+		<tr>
+			<th>ID</th>
+			<th>会员</th>
+			<th>商家名称</th>
+			<th>电话</th>
+			<th>状态</th>
+			<th>申请时间</th>
+			<th>操作</th>
+		</tr>
+	</thead>
+
+	<tbody>
+		{foreach from=$rs item=row}
+		<tr>
+			<td>{$row->id}</td>
+			<td><a href="?app=shop&act=shop_apply_edit&id={$row->id}">{$row->member_name}</a></td>
+			<td>{$row->name}</td>
+			<td>{$row->mobile}</td>
+			<td>{if $row->status==0} 等待审核 {else if $row->status==1} 已审核 {/if}</td>
+			<td>{date('Y-m-d H:i:s', $row->add_time)}</td>
+			<td>
+				<a href="?app=shop&act=shop_apply_edit&id={$row->id}">
+					<button type="button" class="btn btn-xs btn-info">
+					<i class="ace-icon fa fa-pencil bigger-120"></i>
+				</button>
+				</a>
+				<a href="?app=shop&act=shop_apply_delete&id={$row->id}" class="delete">
+					<button type="button" class="btn btn-xs btn-danger">
+					<i class="ace-icon far fa-trash-alt bigger-120"></i>
+				</button>
+				</a>
+			</td>
+		</tr>
+		{foreachelse}
+		<tr bgcolor="white"><td colspan="13" height="50">暂无记录</td></tr>
+		{/foreach}
+
+	</tbody>
+</table>
+</div>
+<div class="mypage">
+	共 {$sharepage.num_records} 个记录  {$sharepage.current_page} / {$sharepage.num_pages} 页  {$sharepage.first_page} {$sharepage.prev} {$sharepage.nav} {$sharepage.next} {$sharepage.last_page}
+</div>
+{include file="footer.html"}

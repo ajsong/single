@@ -1,0 +1,47 @@
+{include file="header.html"}
+<body>
+
+<div class="navBar">
+	<a class="left" href="javascript:history.back()"><i class="return"></i></a>
+	<div class="titleView-x">查看地图</div>
+</div>
+
+<div class="shop-maper">
+	<div>
+		<iframe src="/wap/?app=shop&act=map&id={$data->id}&longitude={$data->longitude}&latitude={$data->latitude}" scrolling="no"></iframe>
+		<a class="ge-top" href="tel://{$data->mobile}">
+			<div>
+				<div class="avatar" style="background-image:url({$data->avatar});"></div>
+				<div class="name"><tt>{$data->city}</tt>-{$data->name}</div>
+				<ul>
+					<li><i></i><span>{$data->mobile}</span></li>
+					<li><i></i><span class="address" province="{$data->province}" city="{$data->city}" district="{$data->district}" address="{$data->address}"></span></li>
+				</ul>
+			</div>
+		</a>
+	</div>
+</div>
+
+{include file="footer.html"}
+<script type="text/javascript" src="js/city.js"></script>
+<script>
+function changeCityCode(){
+	$('tt').each(function(){
+		var html = $(this).html();
+		if(isNaN(html))return true;
+		$(this).html(getCityName(html).replace(/市/g, ''));
+	});
+	$('span.address').each(function(){
+		var _this = $(this), province = _this.attr('province'), city = _this.attr('city'), district = _this.attr('district'), address = _this.attr('address');
+		_this.html(comboCity(province, city, district, address));
+	});
+}
+function resize(){
+	$('.shop-maper > div').height($('.shop-maper').height()-$('.shop-maper a').outerHeight(false));
+}
+$(window).resize(resize);
+$(function(){
+	resize();
+	changeCityCode();
+});
+</script>

@@ -1,0 +1,109 @@
+{include file="header.html"}
+<body>
+
+<div class="navBar">
+	<a class="left" href="javascript:history.back()"><i class="return"></i></a>
+	<div class="titleView-x search-input"><input type="search" id="keyword" value="{if isset($keyword)}{$keyword}{/if}" placeholder="请输入商品关键字" /></div>
+	<a class="right" href="javascript:void(0)"><span>搜索</span></a>
+</div>
+
+<div class="search-list height-wrap">
+	<div class="searchHistory">
+		<div class="title"><a href="javascript:void(0)"></a>搜索历史</div>
+		<ul class="list"></ul>
+	</div>
+	<div class="pullRefresh">
+		<ul class="list goods-item"></ul>
+	</div>
+</div>
+
+{include file="footer.html"}
+<script>
+var offset = $('.pullRefresh .list > li').length;
+function createHtml(g){
+	var html = '<li>\
+		<a href="/wap/?app=goods&act=detail&id='+g.id+'">\
+			<div class="pic" style="background-image:url('+g.pic+');"></div>\
+			<div class="title"><div>'+g.name+'</div><font></font><span><strong>￥</strong>'+g.price.numberFormat(2)+'</span></div>\
+		</a>\
+	</li>';
+	offset++;
+	return html;
+}
+function setLists(){
+	var width = ($('.pullRefresh').width()-4) / 2;
+	$('.list li').width(width);
+	$('.list a .pic').loadbackground();
+}
+function clickRight(){
+	var val = $('#keyword').val();
+	if(!val.length){
+		//$.overloadError('请输入关键字');
+		//return;
+	}
+	$('body').addClass('gr');
+	$('.searchHistory').hide();
+	$('.pullRefresh').data('headerBegin')();
+}
+setLists();
+$(window).resize(setLists);
+$(function(){
+	$('.navBar .right').click(clickRight);
+	$.getJSON('/api/?app=home&act=search_history', function(json){
+		var html = '';
+		if(!$.isArray(json.data)){
+			$('.searchHistory .title a').hide();
+			html += '<li class="norecord">暂无搜索历史</li>';
+		}else{
+			for(var i=0; i<json.data.length; i++){
+				html += '<li><a href="javascript:void(0)">'+json.data[i].content+'</a></li>';
+			}
+		}
+		$('.searchHistory .list').html(html);
+		$('.searchHistory .list a').click(function(){
+			$('#keyword').val($(this).html());
+			clickRight();
+		});
+	});
+	$('.searchHistory .title a').click(function(){
+		var _this = $(this);
+		$.getJSON('/api/?app=home&act=clear_search_history', function(json){
+			_this.hide();
+			var html = '<li class="norecord">暂无搜索历史</li>';
+			$('.searchHistory .list').html(html);
+		});
+	});
+	$('.pullRefresh').pullRefresh({
+		header : true,
+		footer : true,
+		footerNoMoreText : '- END -',
+		refresh : function(fn){
+			var _this = this;
+			offset = 0;
+			$.getJSON('/api/?app=goods&act=index&keyword='+$('#keyword').val(), function(json){
+				if(json.error!=0){ $.overloadError(json.msg);return }
+				var html = '';
+				if($.isArray(json.data.goods))for(var i=0; i<json.data.goods.length; i++)html += createHtml(json.data.goods[i]);
+				_this.find('.list').html(html);
+				setLists();
+				fn();
+			});
+		},
+		load : function(fn){
+			var _this = this;
+			$.getJSON('/api/?app=goods&act=index&keyword='+$('#keyword').val(), { offset:offset }, function(json){
+				if(json.error!=0){ $.overloadError(json.msg);return }
+				var html = '';
+				if($.isArray(json.data.goods))for(var i=0; i<json.data.goods.length; i++)html += createHtml(json.data.goods[i]);
+				_this.find('.list').append(html);
+				setLists();
+				fn();
+			});
+		}
+	});
+	$('#keyword').onkey(function(code){
+		if(code==13)clickRight();
+	});
+	{if isset($keyword)}clickRight();{/if}
+});
+</script>

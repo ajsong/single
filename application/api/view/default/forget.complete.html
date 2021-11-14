@@ -1,0 +1,32 @@
+{include file="header.html"}
+<body>
+
+<div class="navBar">
+	<a class="left" href="/wap/"><i class="return"></i></a>
+	<div class="titleView">密码修改成功</div>
+</div>
+
+<div class="forget-complete main-padding-bottom">
+	<div class="icon"></div>
+	<div class="font">恭喜您！<p>密码修改成功</p></div>
+
+	<font><span>5s</span>后自动跳转</font>
+	<a href="/wap/?tpl=login">登录</a>
+</div>
+
+{include file="footer.html"}
+<script>
+var count = 5, timer = null;
+$(function(){
+	timer = setInterval(function(){
+		if(count<=0){
+			clearInterval(timer);
+			timer = null;
+			location.href = $('.forget-complete a').attr('href');
+			return;
+		}
+		count--;
+		$('.forget-complete font span').html(count+'s');
+	}, 1000);
+});
+</script>

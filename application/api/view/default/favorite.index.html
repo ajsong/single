@@ -1,0 +1,76 @@
+{include file="header.html"}
+<body class="gr">
+
+<div class="navBar">
+	<a class="left" href="javascript:history.back()"><i class="return"></i></a>
+	<div class="titleView-x">我的收藏</div>
+</div>
+
+<div class="favorite-index">
+	<div class="pullRefresh">
+		{if count($data)>0}
+		<ul class="list goods-item">
+			{foreach from=$data name=g item=g}
+			<li>
+				<a href="/wap/?app=goods&act=detail&id={$g->id}">
+					<div class="pic" url="{$g->pic}"></div>
+					<div class="title"><div>{$g->name}</div><font>{if $g->purchase_price>0}正在秒杀中{/if}</font><span><strong>￥{number_format($g->price,2,'.','')}</strong><s>￥{number_format($g->market_price,2,'.','')}</s></span></div>
+				</a>
+			</li>
+			{/foreach}
+		</ul>
+		{/if}
+	</div>
+</div>
+
+{include file="footer.html"}
+<script>
+var offset = $('.pullRefresh .list > li').length;
+function createHtml(g){
+	var html = '<li>\
+		<a href="/wap/?app=goods&act=detail&id='+g.id+'">\
+        <div class="pic" url="'+g.pic+'"></div>\
+        <div class="name"><div>'+g.name+'</div><font>'+(g.purchase_price>0?'正在秒杀中':'')+'</font><span><strong>￥'+g.price.numberFormat(2)+'</strong><s>￥'+g.market_price.numberFormat(2)+'</s></span></div>\
+		</a>\
+	</li>';
+	offset++;
+	return html;
+}
+function setLists(){
+	//var width = ($('.pullRefresh').width()-4) / 2;
+	//$('.list li').width(width);
+	$('.list a .pic').loadbackground();
+}
+$(window).resize(setLists);
+$(function(){
+	setLists();
+	$('.pullRefresh').pullRefresh({
+		header : true,
+		footer : true,
+		footerNoMoreText : '- END -',
+		refresh : function(fn){
+			var _this = this;
+			offset = 0;
+			$.getJSON('/api/?app=favorite&act=index&type_id=1', function(json){
+				if(json.error!=0){ $.overloadError(json.msg);return }
+				var html = '';
+				if($.isArray(json.data))for(var i=0; i<json.data.length; i++)html += createHtml(json.data[i]);
+				_this.find('.list').html(html);
+				setLists();
+				fn();
+			});
+		},
+		load : function(fn){
+			var _this = this;
+			$.getJSON('/api/?app=favorite&act=index&type_id=1', { offset:offset }, function(json){
+				if(json.error!=0){ $.overloadError(json.msg);return }
+				var html = '';
+				if($.isArray(json.data))for(var i=0; i<json.data.length; i++)html += createHtml(json.data[i]);
+				_this.find('.list').append(html);
+				setLists();
+				fn();
+			});
+		}
+	});
+});
+</script>

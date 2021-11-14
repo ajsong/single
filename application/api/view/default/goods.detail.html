@@ -1,0 +1,721 @@
+{include file="header.html"}
+<link type="text/css" href="/js/photoswipe/photoswipe.css" rel="stylesheet" />
+<link type="text/css" href="/js/photoswipe/default-skin/default-skin.css" rel="stylesheet" />
+<script type="text/javascript" src="/js/photoswipe/photoswipe.min.js"></script>
+<script type="text/javascript" src="/js/photoswipe/photoswipe-ui-default.min.js"></script>
+<body class="gr">
+
+<div class="navBar navBar-hidden">
+	<a class="left" href="javascript:history.back()"><i class="return-back"></i></a>
+	<div class="titleView-x">商品详情</div>
+</div>
+
+<div class="goods-detail main-bottom width-wrap">
+	<div class="pics">
+		{if is_array($data->pics) && count($data->pics)}
+		<div class="slide">
+			<ul>
+				{foreach from=$data->pics item=p}
+				<li title="{$p->memo}">
+					<div>
+						{if $p->video!=''}
+						<video width="100%" height="100%" poster="{$p->pic}" preload="auto" controls>
+						<source src="{$p->video}" type="video/mp4" />
+						您的浏览器不支持 video 标签。
+						</video>
+						{else}
+						<a href="{$p->pic}" title="{$p->memo}"><img src="{$p->pic}" /></a>
+						{/if}
+					</div>
+				</li>
+				{/foreach}
+			</ul>
+		</div>
+		<div class="pager"></div>
+		{else}
+		<div class="pic" url="{$data->pic}"></div>
+		{/if}
+	</div>
+	
+	<div class="detail">
+		{if !isset($integral)}
+		{if $data->groupbuy_show==1}
+		<div class="groupbuy clear-after">
+			<div class="groupbuyView">
+				<div class="groupbuyInfo">已团{$data->groupbuy_count}件 - {$data->groupbuy_number}人团</div>
+				{if $data->groupbuy_end_time>0}
+				<div class="countdown">距结束 <i>00天00时00分00秒</i></div>
+				<input type="hidden" id="now" value="{$data->groupbuy_now}" />
+				<input type="hidden" id="countdown" value="{$data->groupbuy_end_time}" />
+				{/if}
+			</div>
+			<div class="price">
+				<div class="clear-after">
+					<span>￥{number_format($data->price,2,'.','')}</span>
+					<div class="side">
+						<s>￥{number_format($data->market_price,2,'.','')}</s>
+						<label><i>限量{$data->groupbuy_amount}件</i><b><div>好货限拼，超级低价</div></b></label>
+					</div>
+				</div>
+			</div>
+		</div>
+		{elseif $data->purchase_show==1}
+		<div class="purchase clear-after">
+			<div class="purchaseView">
+				<div class="progress">
+					<div style="width:{number_format($data->purchase_count/$data->purchase_amount*100,1,'.','')}%;"></div>
+					<span>已抢{number_format($data->purchase_count/$data->purchase_amount*100,1,'.','')}%</span>
+				</div>
+				{if $data->purchase_end_time>0}
+				<div class="countdown">距结束 <i>00天00时00分00秒</i></div>
+				<input type="hidden" id="now" value="{$data->purchase_now}" />
+				<input type="hidden" id="countdown" value="{$data->purchase_end_time}" />
+				{/if}
+			</div>
+			<div class="price">
+				<div class="clear-after">
+					<span>￥{number_format($data->price,2,'.','')}</span>
+					<div class="side">
+						<s>￥{number_format($data->origin_price,2,'.','')}</s>
+						<label><i>限量{$data->purchase_amount}件</i><b><div>{if $data->purchase_end_time>0}限时秒杀{else}正在秒杀{/if}</div></b></label>
+					</div>
+				</div>
+			</div>
+		</div>
+		{elseif $data->chop_show==1}
+		<div class="chop clear-after">
+			<div class="chopView">
+				<div class="chopInfo">已砍{$data->chop_count}件</div>
+				{if $data->chop_end_time>0}
+				<div class="countdown">距结束 <i>00天00时00分00秒</i></div>
+				<input type="hidden" id="now" value="{$data->chop_now}" />
+				<input type="hidden" id="countdown" value="{$data->chop_end_time}" />
+				{/if}
+			</div>
+			<div class="price">
+				<div class="clear-after">
+					<span>￥{number_format($data->price,2,'.','')}</span>
+					<div class="side">
+						<s>￥{number_format($data->origin_price,2,'.','')}</s>
+						<label><i>限量{$data->chop_amount}件</i><b><div>限时第一刀半价！</div></b></label>
+					</div>
+				</div>
+			</div>
+		</div>
+		{else}
+		<div class="price">
+			<div class="clear-after">
+				<span>￥{number_format($data->price,2,'.','')}</span>
+				<div class="side">
+					<s>原价￥{number_format($data->market_price,2,'.','')}</s>
+				</div>
+			</div>
+		</div>
+		{/if}
+		<div class="name">{$data->name}</div>
+		<div class="addition">
+			{if strlen($data->description)}
+			<div class="description">{$data->description}</div>
+			{/if}
+		</div>
+		{if $data->in_shop==1}
+		<div class="shop">
+			<div class="shop-img"></div>
+			<div class="shop-info">此商品线下门店有售</div>
+		</div>
+		{/if}
+		{else}
+		<div class="integral">{$data->integral}积分</div>
+		<div class="name">{$data->name}</div>
+		<div class="addition">
+			{if strlen($data->description)}
+			<div class="description">{$data->description}</div>
+			{/if}
+		</div>
+		{/if}
+		<ul class="clear-after">
+			<li>月销{$data->sales}笔</li>
+			<li>人气{$data->clicks}</li>
+			<li>库存{$data->stocks}</li>
+			{if $data->shop}<li>{$data->shop->province}{$data->shop->city}</li>{/if}
+		</ul>
+	</div>
+	
+	{if $data->groupbuy_show==1 && is_array($data->groupbuy_list) && count($data->groupbuy_list)}
+	<div class="groupbuyList">
+		<div class="title ge-bottom">{count($data->groupbuy_list)}位小伙伴正在开团，您可直接参与</div>
+		<ul>
+			{foreach from=$data->groupbuy_list item=g}
+			<li>
+				<a href="javascript:void(0)" parent_id="{$g->id}">去拼团</a>
+				<div class="info">还差 {$g->remain} 人成团<div>剩余 <i>00:00:00</i></div></div>
+				<div class="avatar" style="{if strlen($g->avatar)}background-image:url({$g->avatar});{/if}"></div>
+				{$g->name}
+				<input type="hidden" class="groupbuy_list_now" value="{$g->groupbuy_now}" />
+				<input type="hidden" class="groupbuy_list_countdown" value="{$g->groupbuy_end_time}" />
+			</li>
+			{/foreach}
+		</ul>
+	</div>
+	{/if}
+	
+	{if !isset($integral)}
+	{if is_array($data->coupons)}
+	<a href="javascript:void(0)" class="param-list coupons push-ico clear-before">
+		<font>优惠</font>
+		<span class="sub-list selected"><strong>优惠券</strong>{foreach from=$data->coupons item=g}{$g->name} {/foreach}</span>
+		<!--<span class="sub-list selected"><strong>本店活动</strong>满2件打7.5折</span>-->
+	</a>
+	{/if}
+	{/if}
+	
+	{if is_array($data->params)}
+	<a href="javascript:void(0)" class="param-list params push-ico">
+		<font>参数</font>
+		<span class="selected">{foreach from=$data->params item=g}{$g.name} {/foreach}</span>
+	</a>
+	{/if}
+	
+	{if !isset($integral)}
+	{if strlen($data->spec)}
+	<a href="javascript:void(0)" class="param-list spec-param push-ico">
+		<font>规格</font>
+		<span>选择{$data->spec}分类</span>
+	</a>
+	{/if}
+	
+	<a href="/wap/?app=comment&act=index&goods_id={$data->id}&pagesize=10" class="comments push-ico">
+		<font>查看评论</font><div>用户评价</div><span>({$data->comments})</span>
+	</a>
+	{/if}
+	
+	<div class="memo">
+		<div class="tip">商品详情</div>
+		<div class="content">
+			{$data->content}
+		</div>
+	</div>
+	
+	{if !isset($integral)}
+	<div class="bottomView toolBar ge-top">
+		{if $data->groupbuy_show==1}
+		<a class="btn groupbuyBtn groupbuy" href="javascript:void(0)">￥{number_format($data->price,2,'.','')}<i>{$data->groupbuy_number}人拼团</i></a>
+		<a class="btn groupbuyBtn buy" href="javascript:void(0)">￥{number_format($data->origin_price,2,'.','')}<i>单独购买</i></a>
+		{elseif $data->chop_show==1}
+		<a class="btn chopBtn chop" href="javascript:void(0)">￥{number_format($data->price,2,'.','')}<i>发起砍价</i></a>
+		<a class="btn chopBtn buy" href="javascript:void(0)">￥{number_format($data->origin_price,2,'.','')}<i>直接购买</i></a>
+		{else}
+		<a class="btn buy" href="javascript:void(0)">{if $data->purchase_show==1}立即秒杀{else}立即购买{/if}</a>
+		<a class="btn add_cart" href="javascript:void(0)">加入购物车</a>
+		{/if}
+		<!--<a class="im" href="javascript:void(0)" member_id="xxx"></a>-->
+		<a class="fav {if $data->favorited==1}fav-x{/if}" href="javascript:void(0)"></a>
+		<a class="cart badge" href="/wap/?app=cart&act=index"><sub></sub></a>
+	</div>
+	{else}
+	<a class="integralBtn" href="javascript:void(0)">立即兑换</a>
+	{/if}
+</div>
+
+{if strlen($data->spec)}
+<div class="goods-group goods-spec">
+	<div class="picView">
+		<div>
+			<a href="javascript:void(0)"><b>⊗</b></a>
+			{if is_array($data->pics) && count($data->pics)}
+			<a class="pic" href="{$data->pics[0]->pic}" url="{$data->pics[0]->pic}" style="background-image:url({$data->pics[0]->pic});"></a>
+			{else}
+			<a class="pic" href="{$data->pic}" url="{$data->pic}" style="background-image:url({$data->pic});"></a>
+			{/if}
+			<strong>￥{number_format($data->price,2,'.','')}</strong>
+			<font>库存{$data->stocks}件</font>
+			<span>选择{$data->spec}分类</span>
+		</div>
+	</div>
+	<div class="specView">
+		{foreach from=$data->specs item=g}
+		<div class="specGroup clear-after ge-top ge-light">
+			<div>{$g->name}</div>
+			{foreach from=$g->sub item=s}
+			<a href="javascript:void(0)" spec_id="{$s->id}"><span>{$s->name}</span></a>
+			{/foreach}
+		</div>
+		{/foreach}
+		{if $data->groupbuy_show==0 && $data->chop_show==0}
+		<div class="specQuantity ge-top ge-light">
+			<div>
+				<a href="javascript:void(0)" class="minus">-</a>
+				<input type="tel" id="quantity" value="1" stocks="{$data->stocks}" />
+				<a href="javascript:void(0)" class="plus">+</a>
+			</div>
+			<span>购买数量</span>
+		</div>
+		{/if}
+	</div>
+	<div class="btnView">
+		{if $data->groupbuy_show==1}
+		<a class="btn specBtn buy" href="javascript:void(0)">单独购买(￥{number_format($data->origin_price,2,'.','')})</a>
+		<a class="btn specBtn groupbuy" href="javascript:void(0)">立即开团</a>
+		<a class="btn specBtn mergebuy hidden" href="javascript:void(0)">立即拼团</a>
+		{elseif $data->chop_show==1}
+		<a class="btn specBtn chopBtn buy" href="javascript:void(0)">直接购买(￥{number_format($data->origin_price,2,'.','')})</a>
+		<a class="btn specBtn chop" href="javascript:void(0)">发起砍价</a>
+		{else}
+		<a class="btn add_cart spec_cart" href="javascript:void(0)">加入购物车</a>
+		<a class="btn buy" href="javascript:void(0)">{if $data->purchase_show==1}立即秒杀{else}立即购买{/if}</a>
+		{/if}
+	</div>
+</div>
+{/if}
+
+{if is_array($data->coupons)}
+<div class="goods-group goods-coupons">
+	<div class="title">优惠券</div>
+	<div class="coupons-view">
+		{foreach from=$data->coupons item=g}
+		<a href="javascript:void(0)" mid="{$g->id}" class="coupons-list">
+			<div class="text">立即抢</div>
+			<div class="info">
+				<div>￥<strong>{$g->coupon_money}</strong>{$g->name}</div>
+				<span>{$g->min_price_memo}</span>
+				<font>{$g->time_memo}</font>
+			</div>
+		</a>
+		{/foreach}
+	</div>
+	<div class="btnView">
+		<a class="btn close" href="javascript:void(0)">完成</a>
+	</div>
+</div>
+{/if}
+
+{if is_array($data->params)}
+<div class="goods-group goods-params">
+	<div class="title">产品参数</div>
+	<div class="params-view">
+		{foreach from=$data->params item=g}
+		<div class="params-list ge-bottom ge-light">
+			<font>{$g.name}</font>
+			<span>{$g.value}</span>
+		</div>
+		{/foreach}
+	</div>
+	<div class="btnView">
+		<a class="btn close" href="javascript:void(0)">完成</a>
+	</div>
+</div>
+{/if}
+
+<input type="hidden" id="goods_id" value="{$data->id}" />
+
+<form action="/wap/?app=cart&act=commit" method="post">
+{if !isset($integral)}
+{if $data->groupbuy_show==1}<input type="hidden" name="type" id="type" value="1" />
+{elseif $data->purchase_show==1}<input type="hidden" name="type" id="type" value="2" />
+{elseif $data->chop_show==1}<input type="hidden" name="type" id="type" value="3" />
+{else}<input type="hidden" name="type" id="type" value="0" />{/if}
+{else}<input type="hidden" name="type" id="type" value="0" />{/if}
+<input type="hidden" name="parent_id" id="parent_id" value="0" />
+<input type="hidden" name="goods" id="goods" />
+{if isset($integral)}<input type="hidden" name="integral_order" value="1" />{/if}
+</form>
+
+{include file="footer.html"}
+<script>
+(function($){
+//抛物线动画
+$.fn.parabola = function(options){
+	options = $.extend({
+		maxTop: 20, //默认顶点高度top值
+		speed: 1.0, //移动速度
+		start: { }, //top, left, width, height
+		end: { }, //参数同上
+		after: null //动画完成后执行
+	}, options);
+	return this.each(function(){
+		let _this = $(this), settings = $.extend({}, options), start = settings.start, end = settings.end;
+		if(!_this.parent().length)$(document.body).append(_this);
+		//运动过程中有改变大小
+		if(start.width==null || start.height==null)start = $.extend(start, { width:_this.width(), height:_this.height() });
+		_this.css({ margin:'0', position:'fixed', 'z-index':9999, width:start.width, height:start.height });
+		//运动轨迹最高点top值
+		let vertex_top = Math.min(start.top, end.top) - Math.abs(start.left - end.left) / 3;
+		//可能出现起点或者终点就是运动曲线顶点的情况
+		if(vertex_top < settings.maxTop)vertex_top = Math.min(settings.maxTop, Math.min(start.top, end.top));
+		else vertex_top = Math.min(start.top, $(window).height()/2);
+		//运动轨迹在页面中的top值可以抽象成函数 a = curvature, b = vertex_top, y = a * x*x + b;
+		let distance = Math.sqrt(Math.pow(start.top - end.top, 2) + Math.pow(start.left - end.left, 2)),
+			steps = Math.ceil(Math.min(Math.max(Math.log(distance) / 0.05 - 75, 30), 100) / settings.speed), //元素移动次数
+			ratio = start.top === vertex_top ? 0 : -Math.sqrt((end.top - vertex_top) / (start.top - vertex_top)),
+			vertex_left = (ratio * start.left - end.left) / (ratio - 1),
+			//特殊情况, 出现顶点left==终点left, 将曲率设置为0, 做直线运动
+			curvature = end.left === vertex_left ? 0 : (end.top - vertex_top) / Math.pow(end.left - vertex_left, 2);
+		settings = $.extend(settings, {
+			count: -1, //每次重置为-1
+			steps: steps,
+			vertex_left: vertex_left,
+			vertex_top: vertex_top,
+			curvature: curvature
+		});
+		move();
+		function move(){
+			let opt = settings, start = opt.start, count = opt.count, steps = opt.steps, end = opt.end;
+			//计算left top值
+			let left = start.left + (end.left - start.left) * count / steps,
+				top = opt.curvature === 0 ? start.top + (end.top - start.top) * count / steps : opt.curvature * Math.pow(left - opt.vertex_left, 2) + opt.vertex_top;
+			//运动过程中有改变大小
+			if(end.width!==null && end.height!==null){
+				let i = steps / 2,
+					width = end.width - (end.width - start.width) * Math.cos(count < i ? 0 : (count - i) / (steps - i) * Math.PI / 2),
+					height = end.height - (end.height - start.height) * Math.cos(count < i ? 0 : (count - i) / (steps - i) * Math.PI / 2);
+				_this.css({ width:width, height:height, 'font-size':Math.min(width, height)+'px' });
+			}
+			_this.css({ left:left, top:top });
+			opt.count++;
+			let time = window.requestAnimationFrame(move);
+			if (count === steps) {
+				window.cancelAnimationFrame(time);
+				if($.isFunction(opt.after))opt.after.call(_this);
+			}
+		}
+	});
+};
+})(jQuery);
+function getCart(){
+	$.getJSON('/api/?app=cart&act=total', function(json){
+		$('.badge sub').html(json.data.quantity>0?'<b>'+json.data.quantity+'</b>':'');
+	});
+}
+function resize(){
+	$('.goods-detail .pics, .goods-detail .pics .pic, .goods-detail .slide').autoHeight(640, 640);
+}
+resize();
+$(window).resize(resize);
+$(function(){
+	if($('.pics .pic').length)$('.pics .pic').loadbackground().photoBrowser();
+	else $('.goods-detail .slide').touchmove({
+		title : 'title',
+		drag : true,
+		keydown : true,
+		pager : '.pics .pager',
+		offset : 'center',
+		complete : function(){
+			$('.pics li div').loadpic({ fill:this.height() });
+			setTimeout(function(){ $('.slide a').photoBrowser() }, 0);
+		}
+	});
+	$(window).scroll(function(){
+		if($(window).scrollTop()>=$('.pics').height()-$('.navBar').height()){
+			$('.navBar').removeClass('navBar-hidden');
+		}else{
+			$('.navBar').addClass('navBar-hidden');
+		}
+	});
+	
+	if($('.countdown').length){
+		var countdown = Number($('#countdown').val()), now = Number($('#now').val()),
+			countdownFn = function(){
+				var result = countdown - now, r = result;
+				if(result<=0){
+					$('.countdown i').html('00天00时00分00秒');
+					clearInterval(timer);
+					timer = null;
+					location.href = location.href;
+					return;
+				}
+				var day = Math.floor(r/(60*60*24));
+				r = result - day*60*60*24;
+				var hour = Math.floor(r/(60*60));
+				r -= hour*60*60;
+				var minute = Math.floor(r/60);
+				r -= minute*60;
+				var second = r;
+				$('.countdown i').html($.fillZero(day,2)+'天'+$.fillZero(hour,2)+'时'+$.fillZero(minute,2)+'分'+$.fillZero(second,2)+'秒');
+				now += 1;
+			},
+			timer = setInterval(countdownFn, 1000);
+		countdownFn();
+	}
+	
+	$('.groupbuy_list_countdown').each(function(){
+		var _this = $(this), countdown = Number(_this.val()), now = Number(_this.prev().val()),
+			countdownFn = function(){
+				var result = countdown - now, r = result;
+				if(result<=0){
+					_this.parent().find('.info i').html('00:00:00');
+					clearInterval(timer);
+					timer = null;
+					location.href = location.href;
+					return;
+				}
+				var day = Math.floor(r/(60*60*24));
+				r = result - day*60*60*24;
+				var hour = Math.floor(r/(60*60));
+				r -= hour*60*60;
+				var minute = Math.floor(r/60);
+				r -= minute*60;
+				var second = r;
+				_this.parent().find('.info i').html($.fillZero(hour,2)+':'+$.fillZero(minute,2)+':'+$.fillZero(second,2));
+				now += 1;
+			},
+			timer = setInterval(countdownFn, 1000);
+		countdownFn();
+	});
+	
+	$('.memo .content img').each(function(){
+		if($(this).width()>300)$(this).removeAttr('width').removeAttr('height').css({ width:'100%', height:'' });
+	});
+	
+	{if !isset($integral)}
+	getCart();
+	$('.price span').priceFont('bigPrice');
+	
+	$('.spec-param').click(function(){
+		$('.goods-spec').presentView();
+	});
+	$('.specGroup a').click(function(){
+		$(this).addClass('this').siblings('a').removeClass('this');
+		var spec_id = [], spec_name = [], count = 0, groupCount = $('.specGroup').length;
+		$('.specGroup a.this').each(function(){
+			if(!!!$(this).attr('spec_id') || Number($(this).attr('spec_id'))<=0)return false;
+			spec_id.push($(this).attr('spec_id'));
+			spec_name.push($(this).text());
+			count++;
+		});
+		if(count!=groupCount)return;
+		$.getJSON('/api/?app=goods&act=get_spec', { goods_id:$('#goods_id').val(), spec:spec_id.join(',') }, function(json){
+			if(json.error!=0){ $.overloadError(json.msg);return }
+			if(!$.isPlainObject(json.data))return;
+			if(json.data.pic.length)$('.picView .pic').attr('url', json.data.pic).css('background-image', 'url('+json.data.pic+')').photoBrowser();
+			$('.picView strong').html('￥'+json.data.price.numberFormat(2));
+			$('.picView font').html('库存'+json.data.stocks+'件');
+			$('.picView span').html('已选 "'+spec_name.join('" "')+'"');
+			$('#quantity').attr('stocks', json.data.stocks);
+			$('.price span').html('￥'+json.data.price.numberFormat(2)).priceFont('bigPrice');
+			$('.spec-param span').addClass('selected').html('已选 "'+spec_name.join('" "')+'"');
+		});
+	});
+	$('.specGroup').each(function(){
+		if($(this).find('a').length==1)$(this).find('a').click();
+	});
+	$('.picView a:eq(0)').click(function(){
+		$('.goods-spec').presentView(false);
+	});
+	if($('.picView .pic').length)$('.picView .pic').photoBrowser();
+	
+	$('.minus').click(function(){
+		var quantity = $('#quantity');
+		if(Number(quantity.val())<=1)return;
+		quantity.val(Number(quantity.val())-1);
+	});
+	$('.plus').click(function(){
+		var quantity = $('#quantity');
+		if(Number(quantity.val())>Number(quantity.attr('stocks'))){
+			$.overloadError('该商品规格的库存只剩下'+quantity.attr('stocks')+'件');
+			return;
+		}
+		quantity.val(Number(quantity.val())+1);
+	});
+	$('#quantity').focus(function(){
+		var quantity = $(this);
+		if(quantity.val().length)quantity.data('quantity', quantity.val());
+	}).blur(function(){
+		var quantity = $(this);
+		if(!quantity.val().length){
+			$.overloadError('请填写数量');
+			quantity.focus();
+			return;
+		}
+		if(Number(quantity.val())>Number(quantity.attr('stocks'))){
+			$.overloadError('该商品规格的库存只剩下'+quantity.attr('stocks')+'件');
+			quantity.val(quantity.data('quantity'));
+			quantity.focus();
+			return;
+		}
+	});
+	
+	{if $data->purchase_show==1}
+	$.getJSON('/api/?app=goods&act=get_spec', { goods_id:$('#goods_id').val() }, function(json){
+		if(json.error!=0){ $.overloadError(json.msg);return }
+		if(!$.isPlainObject(json.data))return;
+		var spec = json.data.spec.split(',');
+		$.each(spec, function(){
+			$('.specGroup a[spec_id="'+this+'"]').addClass('this');
+		});
+		var spec_name = [], count = 0, groupCount = $('.specGroup').length;
+		$('.specGroup a.this').each(function(){
+			if(!!!$(this).attr('spec_id') || Number($(this).attr('spec_id'))<=0)return false;
+			spec_name.push($(this).text());
+			count++;
+		});
+		if(count!=groupCount)return;
+		if(json.data.pic.length)$('.picView .pic').attr('url', json.data.pic).css('background-image', 'url('+json.data.pic+')').photoBrowser();
+		$('.picView strong').html('￥'+json.data.price.numberFormat(2));
+		$('.picView font').html('库存'+json.data.stocks+'件');
+		$('.picView span').html('已选 "'+spec_name.join('" "')+'"');
+		$('#quantity').attr('stocks', json.data.stocks);
+		$('.price span').html('￥'+json.data.price.numberFormat(2)).priceFont('bigPrice');
+		$('.spec-param span').addClass('selected').html('已选 "'+spec_name.join('" "')+'"');
+	});
+	{/if}
+	
+	$('.im').click(function(){
+		location.href = '/wap/?app=chat&act=talk&member_id='+$(this).attr('member_id');
+	});
+	
+	$('.fav').click(function(){
+		var _this = $(this);
+		$.postJSON('/api/?app=favorite&act=add', { item_id:'{$data->id}', type_id:1 }, function(){
+			if(_this.hasClass('fav-x'))_this.removeClass('fav-x');
+			else _this.addClass('fav-x');
+		});
+	});
+	
+	$('.add_cart').click(function(){
+		var spec_id = [], quantity = 1;
+		if($('.specGroup').length){
+			var count = 0, groupCount = $('.specGroup').length;
+			$('.specGroup a.this').each(function(){
+				if(!!!$(this).attr('spec_id') || Number($(this).attr('spec_id'))<=0) return false;
+				spec_id.push($(this).attr('spec_id'));
+				count++;
+			});
+			if(count!=groupCount){
+				//$.overloadError('请先把规格选择完整');
+				if(!$(this).parents('.goods-spec').length)$('.goods-spec').presentView();
+				return;
+			}
+		}
+		if($('#quantity').length){
+			if(!$('#quantity').val().length){
+				$.overloadError('请填写数量');
+				return;
+			}
+			quantity = $('#quantity').val();
+		}
+		var _this = $(this), goods = [{ goods_id:$('#goods_id').val(), quantity:quantity, spec:spec_id.join(',') }];
+		$.postJSON('/api/?app=cart&act=add', { goods:$.jsonString(goods) }, function(json){
+			var dot = $('<div class="badge-dot"></div>'), sub = $('.badge sub');
+			sub.show();
+			var height = sub.height(), offset = sub.offset(), scrollTop = $(window).scrollTop();
+			sub.css('display', '');
+			dot.parabola({
+				start : {
+					left : _this.offset().left + _this.width()/2,
+					top : _this.offset().top + _this.height()/2 - scrollTop,
+					width : height,
+					height : height
+				},
+				end : {
+					left : offset.left,
+					top : offset.top - scrollTop,
+				},
+				after : function(){
+					sub.html(json.data.quantity>0?'<b>'+json.data.quantity+'</b>':'');
+					this.remove();
+				}
+			});
+		});
+	});
+	
+	$('.buy, .btn.groupbuy, .btn.chop').click(function(){
+		if(!$.checklogin())return;
+		var spec_id = [], quantity = 1;
+		$('#parent_id').val('0');
+		$('.mergebuy').addClass('hidden').siblings().removeClass('hidden');
+		$('#quantity').val('1');
+		if($('.specGroup').length){
+			var count = 0, groupCount = $('.specGroup').length;
+			$('.specGroup a.this').each(function(){
+				if(!!!$(this).attr('spec_id') || Number($(this).attr('spec_id'))<=0) return false;
+				spec_id.push($(this).attr('spec_id'));
+				count++;
+			});
+			if(count!=groupCount){
+				if(!$(this).parents('.goods-spec').length)$('.goods-spec').presentView();
+				return;
+			}
+		}
+		if($('#quantity').length){
+			if(!$('#quantity').val().length){
+				$.overloadError('请填写数量');
+				return;
+			}
+			quantity = $('#quantity').val();
+		}
+		var goods = [{ goods_id:$('#goods_id').val(), quantity:quantity, spec:spec_id.join(',') }];
+		$('#goods').val($.jsonString(goods));
+		if($(this).is('.buy') && $(this).is('.specBtn')){
+			$('#type').val('0');
+		}else if($(this).is('.groupbuy')){
+			$('#type').val('1');
+		}else if($(this).is('.purchase')){
+			$('#type').val('2');
+		}else if($(this).is('.chop')){
+			$('#type').val('3');
+		}
+		$('form').submit();
+	});
+	
+	$('.groupbuyList li a, .mergebuy').click(function(){
+		if(!$.checklogin())return;
+		var spec_id = [], quantity = 1;
+		if(!$(this).is('.mergebuy'))$('.mergebuy').attr('parent_id', $(this).attr('parent_id'));
+		$('#parent_id').val($(this).attr('parent_id'));
+		$('#quantity').val('1');
+		$('.mergebuy').removeClass('hidden').siblings().addClass('hidden');
+		if($('.specGroup').length){
+			var count = 0, groupCount = $('.specGroup').length;
+			$('.specGroup a.this').each(function(){
+				if(!!!$(this).attr('spec_id') || Number($(this).attr('spec_id'))<=0) return false;
+				spec_id.push($(this).attr('spec_id'));
+				count++;
+			});
+			if(count!=groupCount){
+				if(!$(this).parents('.goods-spec').length)$('.goods-spec').presentView();
+				return;
+			}
+		}
+		if($('#quantity').length){
+			if(!$('#quantity').val().length){
+				$.overloadError('请填写数量');
+				return;
+			}
+			quantity = $('#quantity').val();
+		}
+		var goods = [{ goods_id:$('#goods_id').val(), quantity:quantity, spec:spec_id.join(',') }];
+		$('#goods').val($.jsonString(goods));
+		$('#type').val('1');
+		$('form').submit();
+	});
+	
+	{else}
+	$('.integralBtn').click(function(){
+		if(!$.checklogin())return;
+		var goods = [{ goods_id:$('#goods_id').val(), quantity:1 }];
+		$('#goods').val($.jsonString(goods));
+		$('form').submit();
+	});
+	{/if}
+	
+	$('.coupons').click(function(){
+		$('.goods-coupons').presentView();
+	});
+	$('.goods-coupons .close').click(function(){
+		$('.goods-coupons').presentView(false);
+	});
+	$('.goods-coupons .coupons-list').click(function(){
+		var _this = $(this), id = _this.attr('mid');
+		$.getJSON('/api/?app=coupon&act=ling&id='+id, function(json){
+			$.overloadSuccess(json.msg);
+		});
+	});
+	
+	$('.params').click(function(){
+		$('.goods-params').presentView();
+	});
+	$('.goods-params .close').click(function(){
+		$('.goods-params').presentView(false);
+	});
+});
+</script>

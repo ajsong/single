@@ -1,0 +1,448 @@
+{include file="header.html"}
+
+<div class="page-header">
+	<h6>
+		系统管理
+		<small>
+			<i class="ace-icon fa fa-angle-double-right"></i>
+			运费模板
+			<i class="ace-icon fa fa-angle-double-right"></i>
+			{if $row->id}修改{else}添加{/if}运费模板
+		</small>
+	</h6>
+</div>
+<div class="row">
+<div class="col-xs-12">
+	<form class="form-horizontal" role="form" method="post" action="?app=setting&act=shipping_edit" enctype="multipart/form-data">
+		<input type="hidden" name="id" value="{$row->id}" />
+		<div class="form-group">
+			<label class="col-sm-2 control-label no-padding-right" for="name">模板名称</label>
+			<div class="col-sm-10">
+				<input type="text" id="name" name="name" value="{$row->name}" class="col-xs-2 coo-need" />
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label no-padding-right" for="type">计费类型</label>
+			<div class="col-sm-10">
+				<div class="radio">
+					<label>
+						<input type="radio" name="type" value="0" class="type ace" {if $row->type==0}checked{/if} />
+						<span class="lbl">按重量</span>
+					</label>
+				</div>
+				<div class="radio">
+					<label>
+						<input type="radio" name="type" value="1" class="type ace" {if $row->type==1}checked{/if} />
+						<span class="lbl">按件数</span>
+					</label>
+				</div>
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label no-padding-right" for="table">配送区域</label>
+			<div class="col-sm-10">
+				<div class="col-table area">
+					<table>
+						<thead>
+							<tr>
+								<th>可配送区域</th>
+								<th class="first">首重(KG)</th>
+								<th>运费(元)</th>
+								<th class="second">续重(KG)</th>
+								<th>续费(元)</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td><font>默认所有地区配送</font></td>
+								<td><input type="tel" name="default_first" value="{$row->first}" /></td>
+								<td><input type="tel" name="default_first_price" value="{$row->first_price}" /></td>
+								<td><input type="tel" name="default_second" value="{$row->second}" /></td>
+								<td><input type="tel" name="default_second_price" value="{$row->second_price}" /></td>
+							</tr>
+							{foreach from=$area item=g}
+							<tr>
+								<td><font></font><div><a href="javascript:void(0)">修改</a><a href="javascript:void(0)">删除</a></div>
+								<input type="hidden" name="districts[]" value="{$g->districts}" class="districts" /></td>
+								<td><input type="tel" name="first[]" value="{$g->first}" /></td>
+								<td><input type="tel" name="first_price[]" value="{$g->first_price}" /></td>
+								<td><input type="tel" name="second[]" value="{$g->second}" /></td>
+								<td><input type="tel" name="second_price[]" value="{$g->second_price}" /></td>
+							</tr>
+							{/foreach}
+							<tr>
+								<td colspan="5"><a href="javascript:void(0)">指定可配送区域和运费</a></td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+		<div class="clearfix form-actions">
+			<div class="col-md-offset-3 col-md-9">
+				<button class="btn btn-info" type="submit">
+					<i class="ace-icon fa fa-check bigger-110"></i>
+					提交
+				</button>
+
+				&nbsp; &nbsp; &nbsp;
+				<button class="btn" type="reset">
+					<i class="ace-icon fa fa-undo bigger-110"></i>
+					重置
+				</button>
+			</div>
+		</div>
+	</form>
+</div>
+</div>
+
+<div class="modal fade" id="to-area" role="dialog" aria-labelledby="gridSystemModalLabel">
+	<div class="modal-dialog row" role="document" style="margin-top:8%;">
+		<div class="modal-content col-lg-offset-2">
+			<div class="modal-header">
+				选择可配送区域
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+			</div>
+			<div class="modal-body">
+				<div class="container-fluid col-area">
+					<div class="origin"><font><a href="javascript:void(0)">添加</a><a href="javascript:void(0)">全国</a>可选省市区</font><div></div></div>
+					<div class="target"><font><a href="javascript:void(0)">清空</a>已选省市区</font><div></div></div>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn" data-dismiss="modal"> 取消 </button>
+				<button type="button" class="btn get-to"> 确定 </button>
+			</div>
+		</div>
+	</div>
+</div>
+{include file="footer.html"}
+<script>
+var areaData = {$province};
+function changeType(){
+	var val = $(this).val();
+	if(val=='0'){
+		$('.first').html('首重(KG)');
+		$('.second').html('续重(KG)');
+	}else{
+		$('.first').html('首件(个)');
+		$('.second').html('续件(个)');
+	}
+}
+function setArea(data, isOrigin){
+	var html = '';
+	$.each(data, function(){
+		var province = this.id;
+		html += '<span aid="'+this.id+'" subcount="'+this.subcount+'" type="province">'+(!isOrigin?'<b>×</b>':'')+'<i'+((!isOrigin&&this.sub.length)?' class="extend"':'')+(this.sub.length?'':' disabled')+'></i><h1>'+this.name+'</h1>';
+		$.each(this.sub, function(){
+			var city = this.id;
+			html += '<span aid="'+this.id+'" subcount="'+this.subcount+'" province="'+province+'" type="city"'+(isOrigin?' class="hidden"':'')+'>'+(!isOrigin?'<b>×</b>':'')+'<i'+((!isOrigin&&this.sub.length)?' class="extend"':'')+(this.sub.length?'':' disabled')+'></i><h1>'+this.name+'</h1>';
+			$.each(this.sub, function(){
+				html += '<span aid="'+this.id+'" province="'+province+'" city="'+city+'" type="district"'+(isOrigin?' class="hidden"':'')+'>'+(!isOrigin?'<b>×</b>':'')+'<i disabled></i><h1>'+this.name+'</h1></span>';
+			});
+			html += '</span>';
+		});
+		html += '</span>';
+	});
+	if(isOrigin){
+		$('#to-area .origin div').html(html);
+	}else{
+		$('#to-area .target div').html(html);
+	}
+}
+function addElement(els){
+	var _this = $(this), type = _this.attr('type'), obj = { id:_this.attr('aid'), name:_this.children('h1').text() };
+	switch(type){
+		case 'province':
+			obj.subcount = _this.attr('subcount');
+			obj.sub = [];
+			els.push(obj);
+			break;
+		case 'city':
+			obj.subcount = _this.attr('subcount');
+			obj.sub = [];
+			var hasProvince = false, province = _this.attr('province');
+			$.each(els, function(){
+				if(province==this.id){
+					hasProvince = true;
+					var exist = false;
+					$.each(this.sub, function(){
+						if(obj.id==this.id){
+							exist = true;
+							return false;
+						}
+					});
+					if(!exist){
+						this.sub.push(obj);
+						this.sub.sort(function(a, b){
+							var sort1 = Number(a.id), sort2 = Number(b.id);
+							if(sort1<sort2)return -1;
+							if(sort1>sort2)return 1;
+							return 0;
+						});
+					}
+					return false;
+				}
+			});
+			if(!hasProvince){
+				var _province = _this.parent(),
+					provinceObj = { id:_province.attr('aid'), name:_province.children('h1').text(), subcount:_province.attr('subcount'), sub:[obj] };
+				els.push(provinceObj);
+			}
+			break;
+		case 'district':
+			var hasProvince = false, hasCity = false, province = _this.attr('province'), city = _this.attr('city');
+			$.each(els, function(){
+				if(province==this.id){
+					hasProvince = true;
+					$.each(this.sub, function(){
+						if(city==this.id){
+							hasCity = true;
+							this.sub.push(obj);
+							this.sub.sort(function(a, b){
+								var sort1 = Number(a.id), sort2 = Number(b.id);
+								if(sort1<sort2)return -1;
+								if(sort1>sort2)return 1;
+								return 0;
+							});
+							return false;
+						}
+					});
+					if(!hasCity){
+						var _city = _this.parent(),
+							cityObj = { id:_city.attr('aid'), name:_city.children('h1').text(), subcount:_city.attr('subcount'), sub:[obj] };
+						this.sub.push(cityObj);
+						this.sub.sort(function(a, b){
+							var sort1 = Number(a.id), sort2 = Number(b.id);
+							if(sort1<sort2)return -1;
+							if(sort1>sort2)return 1;
+							return 0;
+						});
+					}
+					return false;
+				}
+			});
+			if(!hasProvince){
+				var _city = _this.parent(), _province = _city.parent(),
+					cityObj = { id:_city.attr('aid'), name:_city.children('h1').text(), subcount:_city.attr('subcount'), sub:[obj] },
+					provinceObj = { id:_province.attr('aid'), name:_province.children('h1').text(), subcount:_province.attr('subcount'), sub:[cityObj] };
+				els.push(provinceObj);
+			}
+			break;
+	}
+	els.sort(function(a, b){
+		var sort1 = Number(a.id), sort2 = Number(b.id);
+		if(sort1<sort2)return -1;
+		if(sort1>sort2)return 1;
+		return 0;
+	});
+}
+function getNames(ids){
+	ids = ids.split(',');
+	var names = [], allcount = 0;
+	$('#to-area .origin div span[type="province"] > span').each(function(){
+		allcount += Number($(this).attr('subcount'));
+	});
+	if(allcount==ids.length){
+		names.push('<span class="province">全国</span>');
+	}else{
+		var expr = [];
+		$.each(ids, function(){
+			var province = $('#to-area .origin div span[aid="'+this+'"]').attr('province');
+			expr.push('#to-area .origin div span[aid="'+province+'"]');
+		});
+		$(expr.join(',')).each(function(){
+			var _this = $(this), html = '';
+			if(Number(_this.attr('subcount'))==_this.find('span').length){
+				html = '<span class="province">'+_this.children('h1').text()+'</span>';
+			}else{
+				html = '<span class="province">'+_this.children('h1').text()+'</span><span class="city">(';
+				_this.children('span').each(function(){
+					if(Number($(this).attr('subcount'))==$(this).find('span').length){
+						html += $(this).children('h1').text()+'、';
+					}else{
+						html += $(this).children('h1').text()+':<span class="district">';
+						$(this).children('span').each(function(){
+							html += $(this).children('h1').text()+',';
+						});
+						html = html.substr(0, html.length-1);
+						html += '</span>、';
+					}
+				});
+				html = html.substr(0, html.length-1);
+				html += ')</span>';
+			}
+			names.push(html);
+		});
+	}
+	return names.join('、');
+}
+function setAction(el){
+	$(el).each(function(){
+		var tr = $(this);
+		tr.find('div a').click(function(){
+			if($(this).index()==0){
+				setArea(areaData, true);
+				setTimeout(function(){
+					var districts = tr.find('.districts').val().split(','), expr = [];
+					$.each(districts, function(){
+						expr.push('#to-area .origin div span[aid="'+this+'"]');
+					});
+					$(expr.join(',')).addClass('this');
+					$('#to-area .origin font a:eq(0)').click();
+					var area = $('#to-area').modal(), dismiss = $('.modal-header [data-dismiss="modal"]');
+					dismiss.data('modalHide', function(){
+						area.data('bs.modal').hide();
+						dismiss.off('click', dismiss.data('modalHide'));
+					}).on('click', dismiss.data('modalHide'));
+				}, 10);
+			}else{
+				tr.remove();
+			}
+		});
+	});
+}
+function selectedDistrict(){
+	var ids = [];
+	$('#to-area .target div span[type="district"]').each(function(){
+		ids.push($(this).attr('aid'));
+	});
+	$('#to-area .target div').html('');
+	var tr = $('<tr>\
+			<td><font>'+getNames(ids.join(','))+'</font><div><a href="javascript:void(0)">修改</a><a href="javascript:void(0)">删除</a></div>\
+			<input type="hidden" name="districts[]" value="'+ids.join(',')+'" class="districts" /></td>\
+			<td><input type="tel" name="first[]" value="1" /></td>\
+			<td><input type="tel" name="first_price[]" value="0.00" /></td>\
+			<td><input type="tel" name="second[]" value="0" /></td>\
+			<td><input type="tel" name="second_price[]" value="0.00" /></td>\
+		</tr>');
+	$('.area tbody tr:last').before(tr);
+	setAction(tr)
+}
+$(function(){
+	setArea(areaData, true);
+	$('.area tbody tr:not(:first,:last)').each(function(){
+		var ids = $(this).find('.districts').val();
+		$(this).find('font').html(getNames(ids));
+		setAction($(this));
+	});
+	changeType.call($('.type:checked')[0]);
+	$('.type').click(function(){
+		changeType.call(this);
+	});
+	$('.col-table td[colspan] a').click(function(){
+		setArea(areaData, true);
+		var area = $('#to-area').modal(), dismiss = $('.modal-header [data-dismiss="modal"]');
+		dismiss.data('modalHide', function(){
+			area.data('bs.modal').hide();
+			dismiss.off('click', dismiss.data('modalHide'));
+		}).on('click', dismiss.data('modalHide'));
+	});
+	$('#to-area > div div').on('click', 'span', function(e){
+		var _this = $(this), e = e||event, o = e.target||e.srcElement, _o = $(o);
+		if(_o.is('i') && !!!_o.attr('disabled')){
+			var aid = _this.attr('aid'), div = _this.parents('.origin').length ? '.target' : '.origin',
+				shadow = $('#to-area '+div+' div span[aid="'+aid+'"] > i');
+			if(_o.hasClass('extend')){
+				_o.removeClass('extend');
+				_o.siblings('span').addClass('hidden');
+				shadow.removeClass('extend');
+				shadow.siblings('span').addClass('hidden');
+			}else{
+				_o.addClass('extend');
+				_o.siblings('span:not(.selected)').removeClass('hidden');
+				shadow.addClass('extend');
+				shadow.siblings('span:not(.selected)').removeClass('hidden');
+			}
+		}else if(_o.is('b')){
+			var type = _this.attr('type'), origin = $('#to-area .origin div');
+			switch(type){
+				case 'province':
+					var originSpan = origin.find('span[aid="'+_this.attr('aid')+'"]');
+					originSpan.removeClass('selected').removeClass('this').removeClass('hidden')
+						.find('span').removeClass('selected').removeClass('this').removeClass('hidden');
+					_this.remove();
+					break;
+				case 'city':
+					if(!_this.siblings('span').length){
+						var originSpan = origin.find('span[aid="'+_this.parent().attr('aid')+'"]');
+						originSpan.removeClass('selected').removeClass('this').removeClass('hidden')
+							.find('span').removeClass('selected').removeClass('this').removeClass('hidden');
+						_this.parent().remove();
+					}else{
+						var originSpan = origin.find('span[aid="'+_this.attr('aid')+'"]');
+						originSpan.removeClass('selected').removeClass('this').removeClass('hidden')
+							.find('span').removeClass('selected').removeClass('this').removeClass('hidden');
+						originSpan.parent().removeClass('this').removeClass('hidden');
+						_this.remove();
+					}
+					break;
+				case 'district':
+					if(!_this.siblings('span').length){
+						if(!_this.parent().siblings('span').length){
+							var originSpan = origin.find('span[aid="'+_this.parent().parent().attr('aid')+'"]');
+							originSpan.removeClass('selected').removeClass('this').removeClass('hidden')
+								.find('span').removeClass('selected').removeClass('this').removeClass('hidden');
+							_this.parent().parent().remove();
+						}else{
+							var originSpan = origin.find('span[aid="'+_this.parent().attr('aid')+'"]');
+							originSpan.removeClass('selected').removeClass('this').removeClass('hidden')
+								.find('span').removeClass('selected').removeClass('this').removeClass('hidden');
+							_this.parent().remove();
+						}
+					}else{
+						var originSpan = origin.find('span[aid="'+_this.attr('aid')+'"]');
+						originSpan.removeClass('selected').removeClass('this').removeClass('hidden');
+						originSpan.parent().removeClass('this').removeClass('hidden').parent().removeClass('this').removeClass('hidden');
+						_this.remove();
+					}
+					break;
+			}
+		}else if(_o.parents('.origin').length){
+			if(_this.hasClass('this')){
+				_this.removeClass('this');
+				_this.find('span').removeClass('this');
+			}else{
+				_this.addClass('this');
+				_this.find('span').addClass('this');
+			}
+		}
+		return false;
+	});
+	$('#to-area .origin font a:eq(0)').click(function(){
+		if(!$('#to-area .origin div span.this').length){
+			$.overloadError('请先选择省市区');
+			return;
+		}
+		var els = [];
+		$('#to-area .origin div span.this').addClass('selected').addClass('hidden').each(function(){
+			var _this = $(this);
+			_this.siblings('i').addClass('extend');
+			if(_this.parent().is('span') && _this.parent().children('span.hidden').length==Number(_this.parent().attr('subcount'))){
+				_this.parent().addClass('hidden');
+			}
+			addElement.call(_this, els);
+		});
+		setArea(els);
+	});
+	$('#to-area .origin font a:eq(1)').click(function(){
+		if(!$('#to-area .origin div span:not(.selected)').length)return;
+		$('#to-area .origin div span').addClass('selected').addClass('this').addClass('hidden');
+		setArea(areaData);
+	});
+	$('#to-area .target font a:eq(0)').click(function(){
+		if(!$('#to-area .target div span').length)return;
+		$('#to-area .origin div span[type="province"]').removeClass('selected').removeClass('this').removeClass('hidden').find('i').removeClass('extend');
+		$('#to-area .origin div span:not([type="province"])').removeClass('selected').removeClass('this').addClass('hidden');
+		$('#to-area .target div').html('');
+	});
+	$('.get-to').click(function(){
+		if(!$('#to-area .target div span').length){
+			$.overloadError('请先添加省市区');
+			return;
+		}
+		selectedDistrict();
+		$('.modal-header [data-dismiss="modal"]').click();
+	});
+});
+</script>

@@ -1,0 +1,146 @@
+{include file="header.html"}
+<body class="gr">
+
+<div class="navBar">
+	<a class="left" href="javascript:history.back()"><i class="return"></i></a>
+	<div class="titleView-x">申请退款</div>
+</div>
+
+<form action="/api/?app=order&act=refund" method="post">
+<input type="hidden" name="goalert" value="申请已提交，请耐心等待商家处理" />
+<input type="hidden" name="gourl" value="/wap/?app=order&act=detail&id={$data->id}" />
+<input type="hidden" name="id" value="{$data->id}" />
+<input type="hidden" name="type" id="type" value="" />
+<input type="hidden" name="pics" id="pics" value="" />
+<div class="order-refund">
+	<ul>
+		<li class="ge-bottom ge-light"><strong>退款类型</strong></li>
+		<li class="w l ge-bottom ge-light">
+			<div class="ge-bottom ge-light" type="1">我要退款 <span>(无需退货)</span></div>
+			<div type="2">我要退货</div>
+		</li>
+		
+		<li class="m ge-bottom ge-light"><strong>退款/货原因</strong></li>
+		<li class="w r ge-bottom ge-light"><span>请选择退款原因</span><select name="reason" id="reason"></select></li>
+		
+		<li class="m ge-bottom ge-light type0"><strong>退款金额</strong></li>
+		<li class="w ge-bottom ge-light type0"><input type="tel" name="price" id="price" placeholder="请输入退款金额" readonly value="{$data->total_price}" /></li>
+		
+		<li class="m ge-bottom ge-light"><strong>退款/货说明</strong> <span>(可不填)</span></li>
+		<li class="w ge-bottom ge-light"><input type="text" name="memo" id="memo" placeholder="请输入退款说明" /></li>
+	</ul>
+	<div class="view type1">
+		<span>上传凭证 最多3张</span>
+		<ul></ul>
+		<input type="file" name="filename" multiple />
+	</div>
+	<div class="buttonView">
+		<a href="javascript:void(0)" class="btn pass">提交申请</a>
+	</div>
+</div>
+</form>
+
+{include file="footer.html"}
+<script>
+var total_price = Number('{$data->total_price}'), _images = [],
+	_types = ['我要退款', '我要退货'],
+	_reasons = ['卖家态度差', '物流太慢了', '货品损坏或缺少', '不想买了'];
+function changeType(div){
+	$('.l div').find('i').remove();
+	var type = div.prepend('<i></i>').attr('type') * 1;
+	$('#type').val(type);
+	if(type==1){
+		//$('.type0').slideDown(300);
+		$('.type1').slideUp(300);
+	}else{
+		//$('.type0').slideUp(300);
+		$('.type1').slideDown(300);
+	}
+}
+$(function(){
+	changeType($('.l div:eq(0)'));
+	$('html').addClass('gr');
+	$('.l div').click(function(){
+		changeType($(this));
+	});
+	$('.r').click(function(){
+		$.actionpicker({
+			title : '退款原因',
+			rightBtn : {
+				text : '确定',
+				click : function(){
+					$('.r span').html($('#reason').selected().val()).addClass('b');
+					$.actionpicker();
+				}
+			},
+			before : function(){
+				if(!$('#reason').html().length){
+					var html = '';
+					for(var i=0; i<_reasons.length; i++){
+						html += '<option value="'+_reasons[i]+'">'+_reasons[i]+'</option>';
+					}
+					$('#reason').html(html);
+				}
+				this.selectpicker({
+					objs : [$('#reason')],
+					select : function(component, row){
+						//$('.r span').html($('#reason').selected().val()).addClass('b');
+					}
+				});
+			}
+		});
+	});
+	$('.view').on('change', ':file', function(e){
+		var files = this.files;
+		if(files.length+_images.length > 3){
+			$.overloadError('最多只能上传3张图片');
+			return;
+		}
+		var images = [];
+		$(this).ajaxupload({
+			url : '/api/?app=other&act=uploadfile',
+			data : { dir:'refund' },
+			rightnow : true,
+			callback : function(json){
+				images.push(json.data);
+				_images.push(json.data);
+				if(files.length==images.length){
+					$('.view span').hide();
+					var html = '';
+					for(var i=0; i<_images.length; i++){
+						html += '<li style="background-image:url('+_images[i]+');"></li>';
+					}
+					$('.view ul').html(html).show();
+				}
+			}
+		});
+	});
+	$('.buttonView .btn').click(function(){
+		if (!$('#type').val().length) {
+			alert('请选择退款类型');
+			return false;
+		}
+		if (!$('#reason').selected().length) {
+			alert('请选择退款原因');
+			return false;
+		}
+		if (!$('#price').val().length) {
+			alert('请输入退款金额');
+			return false;
+		}
+		if (Number($('#price').val())>total_price) {
+			alert('退款金额不能大于订单金额');
+			return false;
+		}
+		if (Number($('#type').val())==2) {
+			if(!_images.length){ alert('请选择图片凭证');return }
+			$('#pics').val($.jsonString(_images));
+		}
+		if (!$('#memo').val().length) {
+			//alert('请输入退款说明');
+			//return false;
+		}
+		$('form').submit();
+	});
+});
+</script>

@@ -1,0 +1,152 @@
+{include file="header.html"}
+
+<div class="page-header">
+	<h6>
+		财务管理
+		<small>
+			<i class="ace-icon fa fa-angle-double-right"></i>
+			财务统计
+		</small>
+	</h6>
+</div>
+
+<form class="form-inline" action="?" method="get">
+<input type="hidden" name="app" id="app" value="{$app}" />
+<input type="hidden" name="act" id="act" value="{$act}" />
+<input type="hidden" name="order_id" value="{$order_id}" />
+<div>
+<a class="excel" href="javascript:void(0)" style="float:right;line-height:35px;">导出到excel</a>
+交易时间：<input type="text" class="form-control" name="begin_date" id="begin_date" placeholder="开始日期" value="{$begin_date}" initdate="" style="width:100px;" />
+ -
+<input type="text" class="form-control" name="end_date" id="end_date" placeholder="结束日期" value="{$end_date}" initdate="" style="width:100px;" />
+关键词：<input type="text" class="input-xxlarge" placeholder="关键词" name="keyword" value="{$keyword}" />
+</div>
+
+<div style="padding-top:5px;">
+<select name="status" id="status" class="form-control">
+	<option value=""> 订单状态 </option>
+	<option value="0" {if $status=="0"}selected{/if}>未支付</option>
+	<option value="1" {if $status==1}selected{/if}>已支付</option>
+	<option value="2" {if $status==2}selected{/if}>已确认</option>
+	<option value="3" {if $status==3}selected{/if}>进行中</option>
+	<option value="4,5" {if $status=="4,5"}selected{/if}>已完成</option>
+	<option value="-1" {if $status==-1}selected{/if}>已取消</option>
+	<option value="-2" {if $status==-2}selected{/if}>已退款</option>
+</select>
+
+<select name="shop_id" id="shop_id" class="selectpicker form-control"  data-live-search="true">
+	<option value=""> 门店 </option>
+	{foreach from=$shops name=shop item=shop}
+	<option value="{$shop->id}" {if $shop->id==$shop_id}selected{/if}>{$shop->name}</option>
+	{/foreach}
+</select>
+
+<select name="project_id" id="project_id" class="form-control selectpicker" data-live-search="true" >
+	<option value=""> 项目 </option>
+	{foreach from=$projects name=project item=project}
+	<option value="{$project->id}" {if $project->id==$project_id}selected{/if}>{$project->name}</option>
+	{/foreach}
+</select>
+
+<select name="is_commit" id="is_commit" class="form-control">
+	<option value=""> 结算状态 </option>
+	<option value="0" {if $is_commit=="0"}selected{/if}>未结算</option>
+	<option value="1" {if $is_commit==1}selected{/if}>已结算</option>
+</select>
+
+<select name="pay_method" id="pay_method" class="form-control">
+	<option value=""> 支付方式 </option>
+	<option value="wxpay" {if $pay_method=="wxpay"}selected{/if}>APP内微信支付</option>
+	<option value="wxpay_h5" {if $pay_method=="wxpay_h5"}selected{/if}>服务号内支付</option>
+	<option value="wxpay_mini" {if $pay_method=="wxpay_mini"}selected{/if}>小程序内支付</option>
+	<option value="alipay" {if $pay_method=="alipay"}selected{/if}>支付宝支付</option>
+	<option value="yue" {if $pay_method=="yue"}selected{/if}>余额支付</option>
+</select>
+
+<button type="submit" class="btn btn-info btn-sm">
+	<i class="ace-icon fa fa-search bigger-110"></i>搜索
+</button>
+</div>
+
+</form>
+
+<div style="padding:10px 0;">
+	总交易金额(包括套餐总价)：<font color="red">￥{number_format($total_price,2)}</font>　　微信交易总额(包括套餐总价)：<font color="red">￥{number_format($wx_price,2)}</font>　　支付宝交易总额(包括套餐总价)：<font color="red">￥{number_format($ali_price,2)}</font>　　全部订单数量：<font color="red">{$order_count}</font><br />
+	未支付数量：<font color="red">{$nopay_count}</font>　　已支付数量：<font color="red">{$pay_count}</font>　　已取消数量：<font color="red">{$cancel_count}</font>　　已退款数量：<font color="red">{$refund_count}</font>　　已完成数量：<font color="red">{$ok_count}</font>　　已结算数量：<font color="red">{$commit_count}</font>　　已使用优惠券数量：<font color="red">{$coupon_count}</font>
+</div>
+
+<div class="table-content">
+<table id="simple-table" class="table table-striped table-bordered table-hover">
+	<thead>
+		<tr>
+			<th>ID</th>
+			<th>订单号</th>
+			<th>门店</th>
+			<th>订单项目</th>
+			<th>下单人</th>
+			<th>服务时间</th>
+			<th>下单时间</th>
+			<th>支付时间</th>
+			<th>支付金额</th>
+			<th>交易费</th>
+			<th>现金券</th>
+			<th>支付方式</th>
+			<th>订单状态</th>
+			<th>结算状态</th>
+			<th>结算金额</th>
+			<th>是否结算</th>
+		</tr>
+	</thead>
+
+	<tbody>
+		{foreach from=$rs item=row name=row}
+		<tr>
+			<td>{$row->id}</td>
+			<td><a href="?app=order&act=edit&id={$row->id}" target="_blank">{$row->order_sn}</a></td>
+			<td><a href="?app=shop&act=edit&id={$row->shop_id}" target="_blank">{$row->shop_name}</a></td>
+			<td nowrap>{$row->project_names}</td>
+			<td><a href="?app=member&act=edit&id={$row->member_id}" target="_blank">{$row->name}</a></td>
+			<td>{$row->service_time}</td>
+			<td>{date('Y-m-d',$row->add_time)}</td>
+			<td>{date('Y-m-d',$row->pay_time)}</td>
+			<td>￥{number_format($row->total_price,2)}</td>
+			<td>5%</td>
+			<td>{if $row->member_cash_coupon_id}<font color="red">-{$row->cash_coupon_money}</font>{else}-{/if}</td>
+			<td>{$row->pay_method_name}</td>
+			<td>{$row->status_name}</td>
+			<td>{if $row->is_commit}<font color="green">已结算</font>{else}<font color="red">未结算</font>{/if}</td>
+			<td><font color="gray">￥{number_format($row->total_price-$row->total_price*0.05, 2)}</font></td>
+			<td>
+				{if $row->is_commit}
+				<font color="gray">已结算</font>
+				{else}
+				<a href="?app=finance&act=commit&id={$row->id}" class="confirm">结算</a>
+				{/if}
+			</td>
+		</tr>
+		{foreachelse}
+		<tr bgcolor="white"><td colspan="13" height="50">暂无记录</td></tr>
+		{/foreach}
+
+	</tbody>
+</table>
+</div>
+<div class="mypage">
+	共 {$sharepage.num_records} 个记录  {$sharepage.current_page} / {$sharepage.num_pages} 页  {$sharepage.first_page} {$sharepage.prev} {$sharepage.nav} {$sharepage.next} {$sharepage.last_page}
+</div>
+
+{include file="footer.html"}
+<script>
+$(function(){
+	$('.selectpicker').selectpicker({ isPicker:false });
+	$('#begin_date').datepicker();
+	$('#end_date').datepicker();
+	$('.form-inline button').click(function(){
+		$('#act').val('index');
+	});
+	$('.excel').click(function(){
+		$('#act').val('excel');
+		$('.form-inline').submit();
+	});
+});
+</script>

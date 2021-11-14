@@ -1,0 +1,37 @@
+{include file="header.html"}
+<body class="height-wrap">
+
+<div class="download">
+	<ul>
+		<li class="android" url="http://www.anzhi.com/soft_2878185.html">
+			<img src="/images/space.gif" />
+			<div><a href="javascript:void(0)">安卓下载</a></div>
+		</li>
+		<li class="ios" url="https://itunes.apple.com/cn/app/id1182271776">
+			<img src="/images/space.gif" />
+			<div><a href="javascript:void(0)">iOS下载</a></div>
+		</li>
+	</ul>
+</div>
+
+<div class="down-mark" style="display:none;"></div>
+
+{include file="footer.html"}
+<script>
+$(function(){
+	var android_url = $('.android').attr('url');
+	$('.android img').attr('src', '/api/?app=other&act=qrcode&data='+$.urlencode(android_url)+'&logo='+$.urlencode('/images/logo1.png'));
+	$('.android a').attr('href', android_url);
+	
+	var ios_url = $('.ios').attr('url');
+	$('.ios img').attr('src', '/api/?app=other&act=qrcode&data='+$.urlencode(ios_url)+'&logo='+$.urlencode('/images/logo1.png'));
+	if(!$.browser.wx){
+		$('.ios a').attr('href', ios_url);
+	}else{
+		$('.ios a').click(function(){ $('.down-mark').fadeIn(300) });
+	}
+	$('.down-mark').tapper(function(){
+		$(this).fadeOut(300);
+	});
+});
+</script>

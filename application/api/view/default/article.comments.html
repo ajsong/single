@@ -1,0 +1,148 @@
+{include file="header.html"}
+<body>
+
+<div class="navBar">
+	<a class="left" href="/wap/?app=article&act=detail&id={$article_id}"><i class="return"></i></a>
+	<div class="titleView">全部评论</div>
+</div>
+
+<div class="article-detail main-padding-bottom">
+	<div class="pullRefresh">
+		<ul class="list">
+			{if is_array($data) && count($data)}
+			{foreach from=$data item=g}
+			<li class="ge-bottom ge-light">
+				<a href="javascript:void(0)" article_id="{$article_id}" comment_id="{$g->id}">
+					<div class="infoView">
+						<i></i>
+						<div {if $g->avatar!=''}style="background-image:url({$g->avatar});"{/if}></div>
+						<span>{$g->member_name}</span>
+						<font>{$g->add_time}</font>
+					</div>
+					<div class="memo">{$g->content}</div>
+					<ul class="reply-list">{foreach from=$g->replys item=r}
+						<li class="replyView">
+							<span class="replier">{$r->member_name}:</span>
+							<span class="reply-memo">{$r->content}</span>
+						</li>
+						{/foreach}</ul>
+				</a>
+			</li>
+			{/foreach}
+			{/if}
+		</ul>
+	</div>
+	
+	<div class="replyPosition" style="display:none;">
+		<span>回复评论</span>
+		<textarea placeholder="请输入评论的回复内容"></textarea>
+		<div>
+			<a href="javascript:void(0)" class="btn">发表</a>
+			<a href="javascript:void(0)" class="cancel">取消</a>
+		</div>
+	</div>
+</div>
+
+{include file="footer.html"}
+<script type="text/javascript" src="js/emojiView/emojiView.js"></script>
+<script>
+var emojiView = null;
+var offset = $('.pullRefresh .list > li').length;
+function createHtml(g){
+	var html = '<li class="ge-bottom ge-light">\
+		<a href="javascript:void(0)" article_id="{$article_id}" comment_id="'+g.id+'">\
+			<div class="infoView">\
+				<i></i>\
+				<div '+(g.avatar!=''?'style="background-image:url('+g.avatar+');"':'')+'></div>\
+				<span>'+g.member_name+'</span>\
+				<font>'+g.add_time+'</font>\
+			</div>\
+			<div class="memo">'+g.content+'</div>\
+			<ul class="reply-list">';
+			if($.isArray(g.replys))for(var i=0; i<g.replys.length; i++){
+				html += '<li class="replyView">\
+					<span class="replier">'+g.replys[i].member_name+':</span>\
+					<span class="reply-memo">'+g.replys[i].content+'</span>\
+				</li>';
+			}
+			html += '</ul>\
+		</a>\
+	</li>';
+	offset++;
+	return html;
+}
+function setEmoji(){
+	$('.list .memo, .list .reply-memo').emojiView();
+	//setTimeout(function(){ $('.list .memo').emojiView(true) }, 3000); //反解析
+}
+$(function(){
+	setEmoji();
+	emojiView = $.emojiView({
+		url : '/api/?app=article&act=post_comment',
+		data : {
+			gourl : '/wap/?app=article&act=comments&article_id={$article_id}',
+			article_id : '{$article_id}'
+		},
+		barParent : '.article-detail',
+		barClass : 'toolBar ge-top'
+	});
+	$('.list').on('click', 'a', function(){
+		if(!$.checklogin())return;
+		var view = $('.replyPosition');
+		view.attr({
+			article_id : $(this).attr('article_id'),
+			comment_id : $(this).attr('comment_id')
+		});
+		$.overlay(view);
+	});
+	$('.replyPosition .btn').click(function(){
+		var article_id = $('.replyPosition').attr('article_id'), comment_id = $('.replyPosition').attr('comment_id'),
+		val = $.trim($('.replyPosition textarea').val());
+		if(!val.length){
+			$.overloadError('请输入评论的回复内容');
+			return;
+		}
+		$.postJSON('/api/?app=article&act=reply_comment', { article_id:article_id, parent_id:comment_id, content:val }, function(json){
+			if(json.error!=0){ $.overloadError(json.msg);return }
+			var html = '<li class="replyView">\
+				<span class="replier">'+json.data.member_name+':</span>\
+				<span class="reply-memo">'+json.data.content+'</span>\
+			</li>';
+			$('a[comment_id="'+comment_id+'"]').find('.reply-list').append(html);
+			$('.replyPosition textarea').val('');
+			$.overlay(false);
+		});
+	});
+	$('.replyPosition .cancel').click(function(){
+		$.overlay(false);
+	});
+	$('.pullRefresh').pullRefresh({
+		header : true,
+		footer : true,
+		footerNoMoreText : '- END -',
+		refresh : function(fn){
+			var _this = this;
+			offset = 0;
+			$.getJSON('/api/?app=article&act=comments&article_id={$article_id}', function(json){
+				if(json.error!=0){ $.overloadError(json.msg);return }
+				var html = '';
+				if($.isArray(json.data))for(var i=0; i<json.data.length; i++)html += createHtml(json.data[i]);
+				_this.find('.list').html(html);
+				setEmoji();
+				fn();
+			});
+		},
+		load : function(fn){
+			var _this = this;
+			$.getJSON('/api/?app=article&act=comments&article_id={$article_id}', { offset:offset }, function(json){
+				if(json.error!=0){ $.overloadError(json.msg);return }
+				var html = '';
+				if($.isArray(json.data))for(var i=0; i<json.data.length; i++)html += createHtml(json.data[i]);
+				_this.find('.list').append(html);
+				setEmoji();
+				fn();
+			});
+		}
+	});
+});
+</script>

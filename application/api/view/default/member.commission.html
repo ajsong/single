@@ -1,0 +1,41 @@
+{include file="header.html"}
+<body class="gr">
+
+<div class="navBar">
+	<a class="left" href="/wap/?app=member&act=index"><i class="return"></i></a>
+	<div class="titleView-x">我的佣金</div>
+</div>
+
+<div class="member-money member-commission">
+	<ul class="groupView">
+		<li class="topView">
+			<a href="javascript:void(0)">
+				<div>佣金金额</div>
+				<span>￥{$data}</span>
+			</a>
+		</li>
+		<li class="ge-bottom ge-light">
+			<a href="/wap/?app=member&act=commission_history" class="push-ico">佣金收益明细</a>
+		</li>
+		<li class="ge-bottom ge-light">
+			<a href="/wap/?app=member&act=my_invite_user" class="push-ico">我邀请的用户</a>
+		</li>
+		<li class="ge-bottom ge-light">
+			<a href="/wap/?app=withdraw&act=index" class="push-ico">申请提现</a>
+		</li>
+		<li class="ge-bottom ge-light">
+			<a href="/wap/?app=bank&act=index" class="push-ico">提现账户管理</a>
+		</li>
+		<li>
+			<a href="/wap/?app=member&act=withdraw_history" class="push-ico">提现历史记录</a>
+		</li>
+	</ul>
+	<a href="/wap/?app=article&act=detail&id=5">如何获得佣金？</a>
+</div>
+
+{include file="footer.html"}
+<script>
+$(function(){
+	$('.topView span').priceFont('bigPrice');
+});
+</script>

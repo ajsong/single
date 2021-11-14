@@ -1,0 +1,142 @@
+{include file="header.html"}
+
+<div class="page-header">
+	<h6>
+		商家管理
+		<small>
+			<i class="ace-icon fa fa-angle-double-right"></i>
+			审核申请
+		</small>
+	</h6>
+</div>
+<div class="row">
+<div class="col-xs-12">
+	<form class="form-horizontal" role="form" method="post" action="?app=shop&act=shop_apply_edit" enctype="multipart/form-data">
+		<input type="hidden" id="id" name="id" value="{$row->id}" />
+		<div class="form-group">
+			<label class="col-sm-2 control-label no-padding-right" for="member_id">会员</label>
+			<div class="col-sm-10 col-height">
+				<a href="?app=member&act=edit&id={$row->member_id}" target="_blank">{$row->member_name}</a>
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label no-padding-right" for="name">店铺名称</label>
+			<div class="col-sm-10">
+				<input type="text" id="name" name="name" value="{$row->name}" class="col-xs-3" />
+			</div>
+		</div>
+		<!--<div class="form-group">
+			<label class="col-sm-2 control-label no-padding-right" for="contacter">联系人/法人</label>
+			<div class="col-sm-10">
+				<input type="text" id="contacter" name="contacter" value="{$row->contacter}" readonly class="col-xs-3" />
+			</div>
+		</div>-->
+		<div class="form-group">
+			<label class="col-sm-2 control-label no-padding-right" for="mobile">联系电话</label>
+			<div class="col-sm-10">
+				<input type="text" id="mobile" name="mobile" value="{$row->mobile}" readonly class="col-xs-3" />
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label no-padding-right" for="email">邮箱</label>
+			<div class="col-sm-10">
+				<input type="text" id="email" name="email" value="{$row->email}" readonly class="col-xs-3" />
+			</div>
+		</div>
+		{if $row->province!=''}
+		<div class="form-group">
+			<label class="col-sm-2 control-label no-padding-right" for="province">店铺区域</label>
+			<div class="col-sm-10">
+				<input type="text" id="province" name="province" value="{$row->province}" readonly class="col-xs-2" style="margin-right:5px;" />
+				<input type="text" id="city" name="city" value="{$row->city}" readonly class="col-xs-2" style="margin-right:5px;" />
+				<input type="text" id="district" name="district" value="{$row->district}" readonly class="col-xs-2" />
+			</div>
+		</div>
+		{/if}
+		<!--<div class="form-group">
+			<label class="col-sm-2 control-label no-padding-right" for="address">店铺地址</label>
+			<div class="col-sm-10">
+				<input type="text" id="address" name="address" value="{$row->address}" readonly class="col-xs-6" />
+			</div>
+		</div>-->
+		<div class="form-group">
+			<label class="col-sm-2 control-label no-padding-right" for="reason">申请说明</label>
+			<div class="col-sm-10">
+				<input type="text" id="reason" name="reason" value="{$row->reason}" readonly class="col-xs-6" />
+			</div>
+		</div>
+		<!--
+		<div class="form-group">
+			<label class="col-sm-2 control-label no-padding-right" for="idcard_pic">身份证图片</label>
+			<div class="col-sm-10">
+				<a href="{$row->idcard_pic1}" target="_blank"><img src="{$row->idcard_pic1}" style="width:100px;margin-right:5px;" /></a>
+				<a href="{$row->idcard_pic2}" target="_blank"><img src="{$row->idcard_pic2}" style="width:100px;" /></a>
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label no-padding-right" for="business_license_pic">营业执照图片</label>
+			<div class="col-sm-10">
+				<a href="{$row->business_license_pic}" target="_blank"><img src="{$row->business_license_pic}" style="width:100px;" /></a>
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label no-padding-right" for="license_pic">许可证图片</label>
+			<div class="col-sm-10">
+				<a href="{$row->license_pic}" target="_blank"><img src="{$row->license_pic}" style="width:100px;" /></a>
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label no-padding-right" for="other_pic">其他图片</label>
+			<div class="col-sm-10">
+				<a href="{$row->other_pic}" target="_blank"><img src="{$row->other_pic}" style="width:100px;" /></a>
+			</div>
+		</div>
+		-->
+		<div class="form-group">
+			<label class="col-sm-2 control-label no-padding-right" for="status">状态</label>
+			<div class="col-sm-10">
+				<div class="radio">
+					<label>
+						<input type="radio" name="status" value="1" class="ace" {if $row->status == 1}checked{/if}/>
+						<span class="lbl"> 审核通过 </span>
+					</label>
+				</div>
+				<div class="radio">
+					<label>
+						<input type="radio" name="status" value="0" class="ace"{if $row->status == 0 }checked{/if} />
+						<span class="lbl"> 等待审核 </span>
+					</label>
+				</div>
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label no-padding-right" for="remark">审核备注</label>
+			<div class="col-sm-10">
+				<input type="text" id="remark" name="remark" value="{$row->remark}" class="col-xs-6" />
+			</div>
+		</div>
+
+		<div class="clearfix form-actions">
+			<div class="col-md-offset-3 col-md-9">
+				<button class="btn btn-info" type="submit">
+					<i class="ace-icon fa fa-check bigger-110"></i>
+					提交
+				</button>
+
+				&nbsp; &nbsp; &nbsp;
+				<button class="btn" type="reset">
+					<i class="ace-icon fa fa-undo bigger-110"></i>
+					重置
+				</button>
+			</div>
+		</div>
+	</form>
+</div>
+</div>
+
+{include file="footer.html"}
+<script type="text/javascript">
+$(function(){
+
+});
+</script>

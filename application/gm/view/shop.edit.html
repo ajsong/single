@@ -1,0 +1,194 @@
+{include file="header.html"}
+<div class="page-header">
+	<h6>
+		商家管理
+		<small>
+			<i class="ace-icon fa fa-angle-double-right"></i>
+			{if $row->id}编辑{else}添加{/if}商家
+		</small>
+	</h6>
+</div>
+<div class="row">
+<div class="col-xs-12">
+	<form class="form-horizontal" role="form" method="post" action="?app=shop&act=edit" enctype="multipart/form-data">
+		<input type="hidden" name="id" value="{$row->id}" />
+		<div class="form-group">
+			<label class="col-sm-2 control-label no-padding-right" for="member_id">所属会员</label>
+			<div class="col-sm-10">
+				<select class="selectpicker" id="member_id" name="member_id" search="true">
+					<option value="">请选择</option>
+					{foreach from=$member item=g}
+					<option value="{$g->id}" {if $g->id==$row->member_id}selected{/if}>{$g->name}</option>
+					{/foreach}
+				</select>
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label no-padding-right" for="name">名称</label>
+			<div class="col-sm-10">
+				<input type="text" id="name" name="name" value="{$row->name}" class="col-xs-6" />
+			</div>
+		</div>
+		<!--
+		<div class="form-group">
+			<label class="col-sm-2 control-label no-padding-right" for="poster_pic">店招图</label>
+			<div class="col-sm-10">
+				<input type="hidden" name="origin_poster_pic" id="origin_poster_pic" value="{$row->poster_pic}" />
+				<div class="col-file col-xs-3"><input type="file" id="poster_pic" name="poster_pic" value="" /></div>
+				<span class="some-line" style="color:red">(图片比例：2:1)</span>
+				{if $row->poster_pic}<a href="{$row->poster_pic}" target="_blank"><img src="{$row->poster_pic}" height="34" /></a>{/if}
+			</div>
+		</div>
+		-->
+		<div class="form-group">
+			<label class="col-sm-2 control-label no-padding-right" for="tel">联系电话</label>
+			<div class="col-sm-10">
+					<input type="text" id="tel" name="tel" value="{$row->tel}" class="col-xs-6" />
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label no-padding-right" for="status">状态</label>
+			<div class="col-sm-10">
+				<div class="radio">
+					<label>
+						<input type="radio" name="status" value="1" class="ace" {if $row->status == 1}checked{/if}/>
+						<span class="lbl"> 正常 </span>
+					</label>
+				</div>
+				<div class="radio">
+					<label>
+						<input type="radio" name="status" value="0" class="ace"{if $row->status == 0 }checked{/if} />
+						<span class="lbl"> 等待审核 </span>
+					</label>
+				</div>
+				<div class="radio">
+					<label>
+						<input type="radio" name="status" value="-1"class="ace" {if $row->status == -1}checked{/if}/>
+						<span class="lbl"> 冻结 </span>
+					</label>
+				</div>
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label no-padding-right" for="sort">排序</label>
+			<div class="col-sm-10">
+				<input type="text" id="sort" name="sort" value="{$row->sort}" class="col-xs-2" />
+			</div>
+		</div>
+		<!--
+		<div class="form-group">
+			<label class="col-sm-2 control-label no-padding-right" for=""></label>
+			<div class="col-sm-10">
+				<div class="checkbox">
+					<label>
+						<input type="checkbox" name="wifi" value="1" {if $row->wifi==1}checked{/if} class="ace" />
+						<span class="lbl"> 免费WIFI </span>
+					</label>
+				</div>
+				<div class="checkbox">
+					<label>
+						<input type="checkbox" name="pickup" value="1" {if $row->pickup==1}checked{/if} class="ace" />
+						<span class="lbl"> 门店取货 </span>
+					</label>
+				</div>
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label no-padding-right" for="app_discount">APP下单折扣</label>
+			<div class="col-sm-10">
+				<input type="text" id="app_discount" name="app_discount" value="{$row->app_discount}" class="col-xs-2" />
+				<span class="lbl" style="line-height:35px;"> 折 </span>
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label no-padding-right" for="business_time">营业时间</label>
+			<div class="col-sm-10">
+				<input type="text" id="business_time" name="business_time" value="{$row->business_time}" class="col-xs-4" />
+			</div>
+		</div>
+		-->
+		<div class="form-group">
+			<label class="col-sm-2 control-label no-padding-right" for="province">所在区</label>
+			<div class="col-sm-10">
+				<select id="province" name="province"></select><span class="some-line"></span>
+				<select id="city" name="city"></select><span class="some-line"></span>
+				<select id="district" name="district"></select>
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label no-padding-right" for="address">地址</label>
+			<div class="col-sm-10">
+				<input type="text" id="address" name="address" value="{$row->address}" class="col-xs-7" />
+				<a class="btn btn-sm" href="javascript:void(0)" id="getLocation" style="margin-left:-2px;">
+					<i class="ace-icon fa fa-search bigger-110"></i>获取经纬度
+				</a>　
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label no-padding-right" for="longitude">经纬度</label>
+			<div class="col-sm-10">
+				<input type="text" id="longitude" name="longitude" value="{$row->longitude}" placeholder="经度" class="col-xs-2" /><span class="some-line"></span>
+				<input type="text" id="latitude" name="latitude" value="{$row->latitude}" placeholder="纬度" class="col-xs-2" /><div class="blank"></div>
+				<div id="allmap" class="col-sm-6" style="height:250px;"></div>
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label no-padding-right" for="description">门店介绍</label>
+			<div class="col-sm-10">
+				<textarea class="form-control ckeditor" id="description" name="description" rows="5">{$row->description}</textarea>
+			</div>
+		</div>
+
+		<div class="clearfix form-actions">
+			<div class="col-md-offset-3 col-md-9">
+				<button class="btn btn-info" type="submit">
+					<i class="ace-icon fa fa-check bigger-110"></i>
+					提交
+				</button>
+
+				&nbsp; &nbsp; &nbsp;
+				<button class="btn" type="reset">
+					<i class="ace-icon fa fa-undo bigger-110"></i>
+					重置
+				</button>
+			</div>
+		</div>
+	</form>
+</div>
+</div>
+
+{include file="footer.html"}
+<script type="text/javascript">
+$(function(){
+	showCity({ districtCode:'{$row->district}', province:'#province', city:'#city', district:'#district' });
+	$('.selectpicker').selectpicker({ isPicker:false });
+	$('#allmap').baiduMapApi({
+		longitude : $('#longitude').val(),
+		latitude : $('#latitude').val(),
+		lngObj : '#longitude',
+		latObj : '#latitude',
+		controlType : 3
+	});
+	$('#getLocation').click(function(){
+		var val = $('#address').val();
+		if(!val.length){
+			alert('请先填写所在地址');
+			return;
+		}
+		var city = $('#city').selected().text(), district = $('#district').selected().text();
+		if($('#district').selected().index()==0)district = '';
+		$.getBaiduPlace(district+val, city, function(json, xq){
+			if(!xq.length){
+				alert('没有找到匹配地址');
+				return;
+			}
+			$('#longitude').val(xq[0].location.lng);
+			$('#latitude').val(xq[0].location.lat);
+			$('#allmap').baiduMap({
+				longitude : xq[0].location.lng,
+				latitude : xq[0].location.lat
+			});
+		});
+	});
+});
+</script>

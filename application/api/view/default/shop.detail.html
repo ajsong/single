@@ -1,0 +1,62 @@
+{include file="header.html"}
+<body class="gr">
+
+<div class="navBar">
+	<a class="left" href="javascript:history.back()"><i class="return"></i></a>
+	<div class="titleView-x">体验店</div>
+</div>
+
+<div class="shop-detail">
+	<div class="infoView">
+		<div class="pic" style="background-image:url({$data->poster_pic});"></div>
+		<div class="view">
+			<a href="tel://{if $data->mobile!=''}{$data->mobile}{else}{$data->tel}{/if}" class="ge-left"></a>
+			<div>{$data->name}</div>
+			<div>
+				<ul>
+					<li>
+						<span class="address" province="{$data->province}" city="{$data->city}" district="{$data->district}" address="{$data->address}"></span>
+					</li>
+					<li>
+						{if $data->wifi==1}<span>免费WIFI</span>{/if}
+						{if $data->pickup==1}<span>门店取货</span>{/if}
+						{if $data->app_discount>0}<span>APP下单{number_format($data->app_discount,1,'.','')}折</span>{/if}
+					</li>
+				</ul>
+			</div>
+		</div>
+	</div>
+	<div class="rowView">
+		<div>
+			<span>营业时间：</span>
+			<div>{$data->business_time}</div>
+		</div>
+	</div>
+	<div class="rowView description">
+		<div>
+			<span>简介：</span>
+			<div>{$data->description}</div>
+		</div>
+	</div>
+	<iframe src="/wap/?app=shop&act=map&id={$data->id}&longitude={$data->longitude}&latitude={$data->latitude}" scrolling="no" frameborder="0"></iframe>
+</div>
+
+<div class="shop-detail-bottom ge-top ge-light">
+	<!--<a href="javascript:void(0)" class="ico1"></a>-->
+	<a href="/wap/?app=shop&act=ads&id={$data->id}" class="ico2"></a>
+	<a href="/wap/?app=coffee&act=index" class="ico3"></a>
+</div>
+
+{include file="footer.html"}
+<script type="text/javascript" src="js/city.js"></script>
+<script>
+function changeCityCode(){
+	$('span.address').each(function(){
+		var _this = $(this), province = _this.attr('province'), city = _this.attr('city'), district = _this.attr('district'), address = _this.attr('address');
+		_this.html(comboCity(province, city, district, address));
+	});
+}
+$(function(){
+	changeCityCode();
+});
+</script>

@@ -1,0 +1,92 @@
+{include file="header.html"}
+<body class="gr">
+
+<div class="navBar">
+	<a class="left" href="/wap/?app=member&act=index"><i class="return"></i></a>
+	<div class="titleView-x">我的攻略</div>
+</div>
+
+<div class="member-article">
+	<div class="pullRefresh">
+		<ul class="list">
+			{foreach from=$data name=g item=g}
+			<li class="ge-bottom ge-light" mid="{$g->id}">
+				<a href="/wap/?app=article&act=detail&id={$g->id}">
+					<div class="title">{$g->title}</div>
+					<div class="view">
+						<div class="time">{$g->add_time}</div>
+						<div class="ico ico1"></div>
+						<font>赞{$g->likes}</font>
+						<div class="ico ico2"></div>
+						<font>评论{$g->comments}</font>
+					</div>
+				</a>
+			</li>
+			{/foreach}
+		</ul>
+	</div>
+</div>
+
+{include file="footer.html"}
+<script>
+var offset = $('.pullRefresh .list > li').length;
+function createHtml(g){
+	var html = '<li class="ge-bottom ge-light" mid="'+g.id+'">\
+		<a href="/wap/?app=article&act=detail&id='+g.id+'">\
+			<div class="title">'+g.title+'</div>\
+			<div class="view">\
+				<div class="time">'+g.add_time+'</div>\
+				<div class="ico ico1"></div>\
+				<font>赞'+g.likes+'</font>\
+				<div class="ico ico2"></div>\
+				<font>评论'+g.comments+'</font>\
+			</div>\
+		</a>\
+	</li>';
+	offset++;
+	return html;
+}
+$(function(){
+	$('.pullRefresh').pullRefresh({
+		header : true,
+		footer : true,
+		footerNoMoreText : '- END -',
+		refresh : function(fn){
+			var _this = this;
+			offset = 0;
+			$.getJSON('/api/?app=member&act=article', function(json){
+				if(json.error!=0){ $.overloadError(json.msg);return }
+				var html = '';
+				if($.isArray(json.data))for(var i=0; i<json.data.length; i++)html += createHtml(json.data[i]);
+				_this.find('.list').html(html);
+				fn();
+			});
+		},
+		load : function(fn){
+			var _this = this;
+			$.getJSON('/api/?app=member&act=article', { offset:offset }, function(json){
+				if(json.error!=0){ $.overloadError(json.msg);return }
+				var html = '';
+				if($.isArray(json.data))for(var i=0; i<json.data.length; i++)html += createHtml(json.data[i]);
+				_this.find('.list').append(html);
+				fn();
+			});
+		}
+	});
+	$('.list').dragshow({
+		title : '<i></i>',
+		cls : 'delBtn',
+		click : function(row){
+			var _this = $(this);
+			$.post('/api/?app=member&act=article_delete', { id:row.attr('mid') }, function(){
+				if(row.parent().find('li').length==1){
+					location.href = location.href;
+				}else{
+					row.slideUp(200, function(){ row.remove() });
+				}
+				_this.delay(0).slideUp(200);
+			});
+		}
+	});
+});
+</script>

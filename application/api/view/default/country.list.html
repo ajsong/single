@@ -1,0 +1,99 @@
+<body class="gr">
+
+<div class="navBar navBar-transparent-notitle">
+	<a class="left" href="/wap/?app=country&act=index"><i class="return"></i></a>
+	<div class="titleView-x">{if isset($data.country->name)}{$data.country->name}{else}国家馆{/if}</div>
+</div>
+
+<div class="country-list width-wrap">
+	<div class="pullRefresh" country_id="{$country_id}" category_id="{if isset($category_id)}{$category_id}{/if}">
+		<header class="ge-bottom ge-light">
+			<ul class="switchView">
+				<li {if !isset($category_id)}class="this"{/if}>
+					<a href="/wap/?app=goods&act=index&country_id={$country_id}">全部</a>
+				</li>
+				{foreach from=$data.country_categories name=g item=g}
+				<li {if isset($category_id) && $category_id==$g->id}class="this"{/if}>
+					<a href="/wap/?app=goods&act=index&country_id={$country_id}&category_id={$g->id}">{$g->name}</a>
+				</li>
+				{/foreach}
+			</ul>
+		</header>
+		
+		<ul class="list goods-item">
+			{foreach from=$data.goods name=g item=g}
+			<li>
+				<a href="/wap/?app=goods&act=detail&id={$g->id}">
+					<div class="pic" style="background-image:url({$g->pic});"></div>
+					<div class="title"><div>{$g->name}</div><span><strong>￥</strong>{number_format($g->price,2,'.','')}</span></div>
+				</a>
+			</li>
+			{/foreach}
+		</ul>
+	</div>
+</div>
+
+<script>
+var offset = $('.pullRefresh .list > li').length;
+function createHtml(g){
+	var html = '<li>\
+		<a href="/wap/?app=goods&act=detail&id='+g.id+'">\
+			<div class="pic" style="background-image:url('+g.pic+');"></div>\
+			<div class="title"><div>'+g.name+'</div><span><strong>￥</strong>'+g.price.numberFormat(2)+'</span></div>\
+		</a>\
+	</li>';
+	offset++;
+	return html;
+}
+function setLists(){
+	var width = ($('.pullRefresh').width()-4) / 2;
+	$('.list li').width(width);
+	$('.list a .pic').loadbackground();
+}
+setLists();
+$(window).resize(setLists);
+$(function(){
+	$('header').sticky({ scroller:'.pullRefresh' });
+	$('.country-list').height($.window().height);
+	$('.switchView').switchView({ column:'column', index:$('.switchView .this').index() });
+	$('.pullRefresh').pullRefresh({
+		header : '<div class="preloader"></div>',
+		footer : true,
+		footerNoMoreText : '- END -',
+		headerView : '<div class="headerView" style="background-image:url({$data.country->detail_pic});"></div>',
+		scroll : function(headerView, headerViewHolder){
+			var scrollTop = this.scrollTop(), height = headerViewHolder.height();
+			if(scrollTop>=height-$('.navBar').height()){
+				$('.navBar').removeClass('navBar-transparent-notitle');
+				headerView.height(44);
+			}else{
+				$('.navBar').addClass('navBar-transparent-notitle');
+				headerView.height(height-scrollTop);
+			}
+		},
+		refresh : function(fn){
+			var _this = this;
+			offset = 0;
+			$.getJSON('/api/?app=goods&act=index&country_id='+this.attr('country_id')+'&category_id='+this.attr('category_id'), function(json){
+				if(json.error!=0){ $.overloadError(json.msg);return }
+				var html = '';
+				if($.isArray(json.data.goods))for(var i=0; i<json.data.goods.length; i++)html += createHtml(json.data.goods[i]);
+				_this.find('.list').html(html);
+				setLists();
+				fn();
+			});
+		},
+		load : function(fn){
+			var _this = this;
+			$.getJSON('/api/?app=goods&act=index&country_id='+this.attr('country_id')+'&category_id='+this.attr('category_id'), { offset:offset }, function(json){
+				if(json.error!=0){ $.overloadError(json.msg);return }
+				var html = '';
+				if($.isArray(json.data.goods))for(var i=0; i<json.data.goods.length; i++)html += createHtml(json.data.goods[i]);
+				_this.find('.list').append(html);
+				setLists();
+				fn();
+			});
+		}
+	});
+});
+</script>

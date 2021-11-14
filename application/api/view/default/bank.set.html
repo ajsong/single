@@ -1,0 +1,31 @@
+{include file="header.html"}
+<body class="gr">
+
+<div class="navBar">
+	<a class="left" href="javascript:history.back()"><i class="return"></i></a>
+	<div class="titleView-x">提现密码管理</div>
+</div>
+
+<div class="bank-set">
+	<ul class="tableView tableView-noMargin">
+		{if $member->withdraw_password==''}
+		<li>
+			<a href="/wap/?app=bank&act=password_set">
+				<h1><span>设置提现密码</span></h1>
+			</a>
+		</li>
+		{else}
+		<li>
+			<a href="/wap/?app=bank&act=password_edit">
+				<h1><span>修改提现密码</span></h1>
+			</a>
+		</li>
+		<li>
+			<a href="/wap/?tpl=forget&action={urlencode('/wap/?app=bank&act=password_set')}">
+				<h1><span>忘记提现密码</span></h1>
+			</a>
+		</li>
+		{/if}
+	</ul>
+</div>
+{include file="footer.html"}

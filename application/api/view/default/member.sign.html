@@ -1,0 +1,64 @@
+{include file="header.html"}
+<link type="text/css" href="/css/datepicker.css" rel="stylesheet" />
+<body class="gr">
+
+{if ($is_app!=1 && $is_mini!=1)}
+<div class="navBar">
+	<a class="left" href="/wap/?app=member&act=index"><i class="return"></i></a>
+	<div class="titleView-x">每日签到</div>
+</div>
+{/if}
+
+<div class="member-sign-green">
+	<ul class="view ge-bottom ge-light">
+		<li>
+			<div>本月累计签到</div>
+			<span>{count($data.days)}天</span>
+		</li>
+		<li>
+			<div>已连续签到</div>
+			<span>{$data.times}天</span>
+		</li>
+	</ul>
+	<div class="sign-integral-bg">
+		<div class="sign-integral ge-bottom ge-light"><span class="month-name"></span>月签到表</div>
+	</div>
+	<div class="cale" initdate="{implode(',',$data.days)}"></div>
+	<div class="buttonView">
+		<a href="javascript:void(0)" class="{if $data.signed!=1}btn{/if}">{if $data.signed==1}已签到{else}立即签到{/if}</a>
+	</div>
+</div>
+
+{include file="footer.html"}
+<script>
+var transform = 'rotate(-5deg) translateX(-3%)';
+function setDatepicker(){
+	$('.cale').datepicker({
+		cls: 'calendar',
+		always: true,
+		multiple: true,
+		hiddenNavBar: true,
+		disable: true,
+		touchMove: false,
+		minDate: '+1',
+		maxDate: 'today'
+	});
+}
+function resize(){
+	$('.member-sign .view').autoHeight(320, 148);
+	var tf = transform + ($.window().width/320!=1 ? ' scale('+($.window().width/320)+')' : '');
+	$('.circle-view').css('transform', tf);
+}
+$(window).resize(resize);
+$(function(){
+	resize();
+	setDatepicker();
+	var months = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十', '十一', '十二'];
+	$('.month-name').html(months[(new Date()).getMonth()]);
+	$('.btn').click(function(){
+		$.postJSON('/api/?app=member&act=sign', { }, function(json){
+			location.href = location.href;
+		});
+	});
+});
+</script>

@@ -1,0 +1,58 @@
+{include file="header.html"}
+<body class="gr">
+
+<div class="navBar">
+	<a class="left" href="javascript:history.back()"><i class="return"></i></a>
+	<div class="titleView-x">申请提现</div>
+</div>
+
+<div class="withdraw-index">
+	<form action="/api/?app=withdraw&act=apply" method="post">
+	<input type="hidden" name="gourl" value="/wap/?app=member&act=withdraw_history" />
+	<input type="hidden" name="goalert" value="{if strlen($data.transfers_appid)}提现成功{else}提交成功，我们将会尽快审核{/if}" />
+	<input type="hidden" name="bank_id" id="bank_id" value="" />
+	<div class="view">
+		<a href="/wap/?app=bank&act=index" class="bank push-ico"><span>请选择提现账户</span>提现银行卡</a>
+		<div class="title">提现金额</div>
+		<div class="money ge-bottom ge-light"><span>￥</span><input type="number" name="withdraw_money" id="withdraw_money" /></div>
+		<!--onkeyup="value=(parseInt((value=value.replace(/\D/g,''))==''||parseInt((value=value.replace(/\D/g,''))==0)?'{$data.min_money}':value,10))" onafterpaste="value=(parseInt((value=value.replace(/\D/g,''))==''||parseInt((value=value.replace(/\D/g,''))==0)?'{$data.min_money}':value,10))"-->
+		<div class="tip"><span>可提现金额￥{number_format($data.money,2,'.','')}，<a href="javascript:void(0)">全部提现</a></span></div>
+		<a class="btn" href="javascript:void(0)">提现</a>
+	</div>
+	</form>
+</div>
+
+{include file="footer.html"}
+<script>
+var commission = Number('{$data.money}');
+$(function(){
+	pushBodyView('.withdraw-index .bank', function(bodyView){
+		bodyView.find('.navBar .right, .submitView').remove();
+		bodyView.find('.list a').attr('href', 'javascript:void(0)').click(function(){
+			var data = $.json($(this).find('textarea').val());
+			$('#bank_id').val(data.id);
+			$('.withdraw-index .tableView a big').addClass('x').html(data.bank_name+' 尾号'+data.bank_card.right(4)+' '+data.name);
+			popBodyView();
+		});
+	});
+	$('.btn').click(function(){
+		if(!$('#withdraw_money').val().length){
+			$.overloadError('请输入提现金额');
+			return;
+		}
+		if ($('#withdraw_money').val()<=0) {
+			$.overloadError('提现金额不合法');
+			return;
+		}
+		if ($('#withdraw_money').val()>commission) {
+			$.overloadError('输入金额超过可提现金额');
+			return;
+		}
+		if(!$('#bank_id').val().length){
+			$.overloadError('请选择提现账户');
+			return;
+		}
+		$('form').submit();
+	});
+});
+</script>

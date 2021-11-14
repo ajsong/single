@@ -1,0 +1,109 @@
+{include file="header.html"}
+<div class="page-header">
+	<h6>
+		统计报表
+		<small>
+			<i class="ace-icon fa fa-angle-double-right"></i>
+			订单统计
+		</small>
+
+	</h6>
+</div>
+
+<form class="form-inline" action="?" method="get">
+<input type="hidden" name="app" id="app" value="{$app}" />
+<input type="hidden" name="act" id="act" value="{$act}" />
+<input type="text" name="begin_time" id="begin_time" value="{$begin_time}" placeholder="开始时间" @="#end_time" />
+<input type="text" name="end_time" id="end_time" value="{$end_time}" placeholder="结束时间" />
+<button type="submit" class="btn btn-info btn-sm">
+	<i class="ace-icon fa fa-search bigger-110"></i>搜索
+</button>
+</form>
+
+<div id="container" style="min-width:310px; height:400px; margin:0 auto;"></div>
+
+{include file="footer.html"}
+<script src="/js/highcharts/js/highcharts.js"></script>
+<script src="/js/highcharts/js/modules/exporting.js"></script>
+<script>
+$(function(){
+	$('#begin_time').datepicker({
+		just:'month',
+		format:'yyyy-m'
+	});
+    $('#container').highcharts({
+        chart: {
+            zoomType: 'xy'
+        },
+        title: {
+            text: '订单统计'
+        },
+        subtitle: {
+            text: ''
+        },
+        xAxis: [{
+            categories: [{$xaxis}]
+        }],
+        yAxis: [{
+            labels: {
+                format: '',
+                style: {
+                    color: '#89A54E'
+                }
+            },
+            title: {
+                text: '订单数',
+                style: {
+                    color: '#89A54E'
+                }
+            }
+        }, {
+            title: {
+                text: '总价',
+                style: {
+                    color: '#4572A7'
+                }
+            },
+            labels: {
+                format: '',
+                style: {
+                    color: '#4572A7'
+                }
+            },
+            opposite: true
+        }],
+        tooltip: {
+            shared: true
+        },
+        legend: {
+            layout: 'vertical',
+            align: 'left',
+            x: 120,
+            verticalAlign: 'top',
+            y: 100,
+            floating: true,
+            backgroundColor: '#FFFFFF'
+        },
+        series: [
+        {
+            name: '订单数',
+            color: '#89A54E',
+            yAxis: 1,
+            type: 'column',
+            data: [{$total_price}],
+            tooltip: {
+                valueSuffix: '元'
+            }
+        },{
+            name: '总价',
+            color: '#4572A7',
+            type: 'spline',
+            data: [{$rs}],
+            tooltip: {
+                valueSuffix: ' 单'
+            }
+
+        } ]
+    });
+});
+</script>

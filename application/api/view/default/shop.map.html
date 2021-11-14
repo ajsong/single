@@ -1,0 +1,17 @@
+{include file="header.html"}
+<body style="overflow:hidden;">
+
+<div id="allmap"></div>
+<input type="hidden" id="longitude" value="{$data.longitude}" />
+<input type="hidden" id="latitude" value="{$data.latitude}" />
+{include file="footer.html"}
+<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=8dCDnV31Xg1QBbrWyrHmquR3"></script>
+<script>
+$(function(){
+	$('html, body, #allmap').addClass('height-wrap');
+	$('#allmap').baiduMap({
+		longitude : $('#longitude').val(),
+		latitude : $('#latitude').val()
+	});
+});
+</script>

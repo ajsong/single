@@ -1,0 +1,37 @@
+{include file="header.html"}
+<body class="gr">
+
+<div class="navBar">
+	<a class="left" href="javascript:history.back()"><i class="return"></i></a>
+	<div class="titleView-x">输入验证码</div>
+</div>
+
+<div class="forget-index">
+	<form action="{$action}" method="post">
+	<input type="hidden" id="forget" name="forget" value="forget" />
+	<input type="hidden" id="mobile" name="mobile" value="{$mobile}" />
+	<input type="hidden" id="code" name="code" value="{$code}" />
+	<input type="tel" id="confirm" class="hidden" />
+	</form>
+</div>
+
+{include file="footer.html"}
+<script>
+$(function(){
+	$('#confirm').passwordView({
+		cls : 'underline',
+		placeholder : '',
+		length : '{$configs.GLOBAL_MOBILE_CODE_NUM}',
+		input : function(){
+			$('#confirm').removeClass('error');
+		},
+		callback : function(){
+			if($('#code').val()!=$('#confirm').val()){
+				$('#confirm').addClass('error');
+				return;
+			}
+			$('form').submit();
+		}
+	});
+});
+</script>
