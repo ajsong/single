@@ -1,0 +1,67 @@
+{include file="header.html"}
+<body class="gr">
+
+<div class="navBar">
+	<a class="left" href="/wap/?app=recharge&act=index"><i class="return"></i></a>
+	<div class="titleView-x">充值</div>
+</div>
+
+<div class="recharge-order">
+	<div class="view">
+		<div class="price">
+			金额　<span>￥{$price}</span>
+			{if $bonus>0}<div>充值{$price} 送{$bonus}</div>{/if}
+		</div>
+	</div>
+	
+	<div class="group">
+		<div class="view f">
+			<div class="tip ge-bottom ge-light">支付方式</div>
+		</div>
+		<div class="view f pay">
+			<a href="javascript:void(0)" class="wx x" pay_method="wxpay_h5"><i></i>微信支付</a>
+		</div>
+	</div>
+	<a class="wx" href="javascript:callpay()">微信支付</a>
+</div>
+
+{include file="footer.html"}
+<script>
+//调用微信JS api 支付
+function jsApiCall(){
+	WeixinJSBridge.invoke(
+		'getBrandWCPayRequest',
+		{$data},
+		function(res){
+			//WeixinJSBridge.log(res.err_msg);
+			if(res.err_msg && res.err_msg=='get_brand_wcpay_request:ok'){
+				location.href = '/wap/?app=recharge&act=index';
+			}else if(res.err_msg && res.err_msg=='get_brand_wcpay_request:cancel'){
+				$('.recharge-order > a.wx').html('重新支付');
+			}else if(res.errMsg){
+				alert('支付失败，原因：\n'+res.errMsg);
+			}else{
+				alert('支付失败，原因：未知');
+			}
+		}
+	);
+}
+
+function callpay(){
+	if (typeof WeixinJSBridge == "undefined"){
+		if( document.addEventListener ){
+			document.addEventListener('WeixinJSBridgeReady', jsApiCall, false);
+		}else if (document.attachEvent){
+			document.attachEvent('WeixinJSBridgeReady', jsApiCall);
+			document.attachEvent('onWeixinJSBridgeReady', jsApiCall);
+		}
+	}else{
+		jsApiCall();
+	}
+}
+
+$(function(){
+	$('.price span').priceFont('bigPrice');
+	callpay();
+});
+</script>

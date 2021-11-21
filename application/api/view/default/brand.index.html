@@ -1,0 +1,93 @@
+{include file="header.html"}
+<body class="gr">
+
+<div class="navBar">
+    <a class="left" href="/wap/"><i class="return"></i></a>
+    <div class="titleView-x">国际大牌</div>
+</div>
+
+<div class="brand-index">
+	<div class="pullRefresh">
+		{if count($data.flashes)>0}
+		<div class="pageView">
+			<div class="slide">
+				<ul>
+					{foreach from=$data.flashes name=g item=g}
+					<li ad_type="{$g->ad_type}" ad_content="{$g->ad_content}" pic="{$g->pic}"></li>
+					{/foreach}
+				</ul>
+			</div>
+			<div class="pager"></div>
+		</div>
+		{/if}
+		<ul class="list">
+			{foreach from=$data.brands name=g item=g}
+			<li>
+				<a href="/wap/?app=goods&act=index&brand_id={$g->id}">
+					<div class="banner" style="background-image: url({$g->banner});"></div>
+					<div class="title"><div class="pic" style="background-image: url({$g->pic});"></div><span>{$g->name}</span></div>
+				</a>
+			</li>
+			{/foreach}
+		</ul>
+	</div>
+</div>
+{include file="footer.html"}
+<script>
+var offset = $('.pullRefresh .list > li').length;
+function createHtml(g){
+	var html = '<li>\
+		<a href="/wap/?app=goods&act=index&brand_id='+g.id+'">\
+			<div class="banner" style="background-image: url('+g.banner+');"></div>\
+			<div class="title"><div class="pic" style="background-image: url('+g.pic+');"></div><span>'+g.name+'</span></div>\
+		</a>\
+	</li>';
+	offset++;
+	return html;
+}
+function resize(){
+	$('.pageView').autoHeight(320, 104);
+	$('.pageView li').css({ width:$('.pageView').width(), height:$('.pageView').height() });
+	$('.pageView').touchmove({
+		pager : '.pager',
+		drag : true,
+		auto : 4000,
+		autoWait : 4000,
+		complete : function(){
+			$('.pager').css('margin-left', -$('.pager').width()/2);
+			setAds('.pageView .slide li');
+		}
+	});
+}
+$(window).resize(resize);
+$(function() {
+	resize();
+	setAds('.pageView .slide li');
+	$('.pullRefresh').pullRefresh({
+		header : true,
+		footer : true,
+		footerNoMoreText : '- END -',
+		refresh : function(fn){
+			var _this = this;
+			offset = 0;
+			$.getJSON('/api/?app=brand&act=index', function(json){
+				if(json.error!=0){ $.overloadError(json.msg);return }
+				var html = '';
+				if($.isArray(json.data.brands))for(var i=0; i<json.data.brands.length; i++)html += createHtml(json.data.brands[i]);
+				_this.find('.list').html(html);
+				fn();
+			});
+		},
+		load : function(fn){
+			var _this = this;
+			$.getJSON('/api/?app=brand&act=index', { offset:offset }, function(json){
+				if(json.error!=0){ $.overloadError(json.msg);return }
+				var html = '';
+				if($.isArray(json.data.brands))for(var i=0; i<json.data.brands.length; i++)html += createHtml(json.data.brands[i]);
+				_this.find('.list').append(html);
+				fn();
+			});
+		}
+	});
+});
+</script>

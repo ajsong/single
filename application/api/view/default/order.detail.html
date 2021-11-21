@@ -1,0 +1,223 @@
+{include file="header.html"}
+<body class="gr">
+
+<div class="navBar">
+	<a class="left" href="javascript:history.back()"><i class="return"></i></a>
+	<div class="titleView-x">订单详情</div>
+</div>
+
+<div class="order-detail">
+	<ul class="groupView">
+		<li>
+			<div class="top status{$data->status}">
+				<div>{if $data->status==2}卖家{/if}{$data->status_name}</div>
+				{if strlen($data->auto_shouhuo)}<span>{$data->auto_shouhuo}</span>{/if}
+			</div>
+			{if is_array($data->express)}
+			<a href="/wap/?app=order&act=express&id={$data->id}" class="express ge-bottom ge-light push-ico">
+				<div>
+					<font>{$data->express[0]->context}</font>
+					<span>{$data->express[0]->time}</span>
+				</div>
+			</a>
+			{/if}
+			<div class="address">
+				<div>
+					<font>{$data->mobile}</font>
+					<span>收货人: {$data->name}</span>
+					<span>收货地址：{$data->province}{if $data->province!=$data->city} {$data->city}{/if} {$data->district} {$data->address}</span>
+				</div>
+			</div>
+		</li>
+		
+		<li>
+			<ul>
+				{foreach from=$data->goods name=g item=g}
+				<li class="ge-bottom ge-light">
+					<div class="gview" price="{$g->price}" quantity="{$g->quantity}">
+						<a href="/wap/?app=goods&act=detail&id={$g->goods_id}" class="pic" url="{$g->goods_pic}"></a>
+						<a href="/wap/?app=goods&act=detail&id={$g->goods_id}" class="name right">{$g->goods_name}</a>
+						{if !isset($integral_order)}
+						<div class="spec">{$g->spec}</div>
+						<div class="price"><span>×{$g->quantity}</span><div>￥{number_format($g->single_price,2,'.','')}</div></div>
+						{if $data->status==3 || $data->status==4}
+						{if $g->comment_time==0}
+						<div class="comment"><a href="/wap/?app=order&act=comment&id={$data->id}"><span>评价</span></a></div>
+						{else}
+						<div class="comment"><font>已评价</font></div>
+						{/if}
+						{/if}
+						{/if}
+					</div>
+				</li>
+				{/foreach}
+			</ul>
+			<div class="view">
+				<div class="trans"><strong>{if $data->shipping_price>0}￥{number_format($data->shipping_price,2,'.','')}{else}免运费{/if}</strong><span>运费</span></div>
+				{if !isset($integral_order)}
+				<div class="total"><strong>￥{number_format($data->total_price,2,'.','')}</strong><span>实付款{if $data->shipping_price>0}(含运费){/if}</span></div>
+				{else}
+				<div class="total"><strong>{intval($data->total_price)}积分</strong><span>总积分</span></div>
+				{/if}
+			</div>
+			<!--
+			<div class="opr ge-top ge-light">
+				<a class="im ge-right ge-light" href="javascript:void(0)" member_id="yanglanzi"><div><span>联系客服</span></div></a>
+				<a class="tel" href="tel://{$data->shop_mobile}"><div><span>拨打电话</span></div></a>
+			</div>
+			-->
+		</li>
+		
+		{if $data->shipping_number!=''}
+		<li>
+			<div class="info">
+				<div>物流公司: {$data->shipping_company}</div>
+				<div>物流单号: {$data->shipping_number}</div>
+			</div>
+		</li>
+		{/if}
+		
+		<li>
+			<div class="info">
+				<div>订单状态: <span class="status status{$data->status}"><font>{$data->status_name}</font>{if $data->status>0 && $data->ask_refund_time>0} <span>(退货退款中)</span>{/if}</span></div>
+				<div>订单编号: {$data->order_sn}</div>
+				<div>创建时间: {$data->add_time_word}</div>
+				{if !isset($integral_order) && $data->pay_time>0}<div>付款时间: {$data->pay_time_word}</div>{/if}
+				{if $data->shipping_time>0}<div>发货时间: {$data->shipping_time_word}</div>{/if}
+				{if $data->shouhuo_time>0}<div>成交时间: {$data->shouhuo_time_word}</div>{/if}
+			</div>
+		</li>
+	</ul>
+	
+	{if (!isset($integral_order) && $data->status>=0) || (isset($integral_order) && $data->status==2)}
+	<div class="bottomView" mid="{$data->id}">
+		<div class="ge-top ge-light">
+			{if $data->status==0}
+			<a class="pay" href="javascript:void(0)" pay_method="{$data->pay_method}"><span>立即支付</span></a>
+			<a class="cancel" href="javascript:void(0)"><span>取消订单</span></a>
+			<form class="pay_form" action="/wap/?app=order&act=pay&order_sn={$data->order_sn}" method="post"></form>
+			<form class="cancel_form" action="/api/?app=order&act=cancel" method="post">
+			<input type="hidden" name="gourl" value="/wap/?app=order&act=detail&id={$data->id}" />
+			<input type="hidden" name="id" value="{$data->id}" />
+			</form>
+			{/if}
+			{if $data->status==1}
+			{if !isset($integral_order) && $data->ask_refund_time==0}
+			<a class="refund" href="javascript:void(0)"><span>我要退款</span></a>
+			{/if}
+			<a class="ask" href="javascript:void(0)"><span>提醒商家发货</span></a>
+			<form class="ask_form" action="/api/?app=order&act=ask_shipping" method="post">
+			<input type="hidden" name="goalert" value="已提醒商家尽快发货，请耐心等待" />
+			<input type="hidden" name="gourl" value="/wap/?app=order&act=detail&id={$data->id}" />
+			<input type="hidden" name="id" value="{$data->id}" />
+			</form>
+			{/if}
+			{if $data->status==2}
+			<a class="ok" href="javascript:void(0)"><span>确认收货</span></a>
+			{if !isset($integral_order) && $data->delay_shouhuo_time==0}
+			<a class="delay" href="javascript:void(0)"><span>延长收货</span></a>
+			{/if}
+			{if !isset($integral_order) && $data->ask_refund_time==0}
+			<a class="refund" href="javascript:void(0)"><span>我要退款</span></a>
+			{/if}
+			<form class="delay_form" action="/api/?app=order&act=delay_shouhuo" method="post">
+			<input type="hidden" name="goalert" value="已执行延迟收货操作" />
+			<input type="hidden" name="gourl" value="/wap/?app=order&act=detail&id={$data->id}" />
+			<input type="hidden" name="id" value="{$data->id}" />
+			</form>
+			{/if}
+			{if $data->status>=3}
+			<a class="again" href="javascript:void(0)"><span>再次购买</span></a>
+			<textarea class="hidden">{json_encode($data->goods)}</textarea>
+			{/if}
+		</div>
+	</div>
+	{/if}
+</div>
+
+{include file="footer.html"}
+<script>
+function setInfo(){
+	$('.gview .pic').loadbackground();
+	{if !isset($integral_order)}$('.view .total strong, .price div').priceFont('bigPrice');{/if}
+}
+$(function(){
+	setInfo();
+	$('.im').click(function(){
+		location.href = '/wap/?app=chat&act=talk'+$(this).attr('member_id');
+	});
+	$('a.pay').click(function(){
+		if($.browser.wechat && $(this).attr('pay_method')=='alipay'){
+			alert('在微信上只能使用微信支付\n该订单下单时使用了支付宝方式');
+			return false;
+		}
+		{if $jsApiParameters}callpay();{else}$('.pay_form').submit();{/if}
+	});
+	$('a.cancel').click(function(){
+		if(!confirm('真的要取消吗？'))return false;
+		$('.cancel_form').submit();
+	});
+	$('a.refund').click(function(){
+		location.href = '/wap/?app=order&act=refund&id='+$(this).parent().parent().attr('mid');
+	});
+	$('a.ask').click(function(){
+		$('.ask_form').submit();
+	});
+	$('a.delay').click(function(){
+		if(!confirm('确定需要延迟收货吗？'))return false;
+		$('.delay_form').submit();
+	});
+	$('a.ok').click(function(){
+		if(!confirm('{if !isset($integral_order)}请收到货后，再确认收货！\n否则您可能钱货两空{else}确认收货吗？{/if}'))return false;
+		$.postJSON('/api/?app=order&act=shouhuo', { id:$(this).parent().parent().attr('mid') }, function(json){
+			if(json.error!=0){ $.overloadError(json.msg);return }
+			location.href = location.href;
+		});
+	});
+	$('a.again').click(function(){
+		$.overload(null);
+		var count = 0, data = $(this).next().val().json();
+		if(!$.isArray(data))return false;
+		$.each(data, function(){
+			var goods = [{ goods_id:this.goods_id, spec:this.spec_linkage, quantity:1 }];
+			$.postJSON('/api/?app=cart&act=add', { goods:$.jsonString(goods) }, function(json){
+				if(json.error!=0){ $.overloadError(json.msg);return }
+				count++;
+				if(count == data.length){
+					location.href = '/wap/?app=cart&act=index';
+				}
+			});
+		});
+	});
+});
+{if $jsApiParameters}
+//调用微信JS api 支付
+function jsApiCall(){
+	WeixinJSBridge.invoke(
+		'getBrandWCPayRequest',
+		{$jsApiParameters},
+		function(res){
+			WeixinJSBridge.log(res.err_msg);
+			if(res.err_msg=='get_brand_wcpay_request:ok'){
+				location.href = '/wap/?app=cart&act=order_complete&order_sn={$data->order_sn}';
+			}else{
+				//alert('支付失败， 原因：\n'+res.err_desc);
+				$('a.pay').html('<span>重新支付</span>');
+			}
+		}
+	);
+}
+function callpay(){
+	if (typeof WeixinJSBridge == 'undefined'){
+		if( document.addEventListener ){
+			document.addEventListener('WeixinJSBridgeReady', jsApiCall, false);
+		}else if (document.attachEvent){
+			document.attachEvent('WeixinJSBridgeReady', jsApiCall);
+			document.attachEvent('onWeixinJSBridgeReady', jsApiCall);
+		}
+	}else{
+		jsApiCall();
+	}
+}
+{/if}
+</script>

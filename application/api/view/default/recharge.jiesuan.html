@@ -1,0 +1,56 @@
+{include file="header.html"}
+<body class="gr">
+
+<div class="navBar">
+	<a class="left" href="javascript:history.back()"><i class="return"></i></a>
+	<div class="titleView-x">充值</div>
+</div>
+
+<div class="recharge-order">
+	<div class="view">
+		<div class="price">
+			金额　<span>￥{$data->price}</span>
+			{if $data->bonus>0}<div>充值{$data->price} 送{$data->bonus}</div>{/if}
+		</div>
+	</div>
+	
+	<div class="group">
+		<div class="view f">
+			<div class="tip ge-bottom ge-light">支付方式</div>
+		</div>
+		<div class="view f pay">
+			<a href="javascript:void(0)" class="wx" pay_method="wxpay_h5"><i></i>微信支付</a>
+		</div>
+	</div>
+	
+	<div class="buttonView">
+		<a class="btn pass" href="javascript:void(0)">确定</a>
+	</div>
+</div>
+
+<form action="/wap/?app=recharge&act=order_pay" method="post">
+<input type="hidden" name="id" id="id" value="{$data->id}" />
+<input type="hidden" name="price" value="{$data->price}" />
+<input type="hidden" name="bonus" value="{$data->bonus}" />
+<input type="hidden" name="pay_method" id="pay_method" value="wxpay_h5" />
+<input type="hidden" name="pay_method_name" value="微信支付" />
+</form>
+
+{include file="footer.html"}
+<script>
+$(function(){
+	$('.price span').priceFont('bigPrice');
+	$('.pay a').click(function(){
+		$('.pay a').removeClass('x');
+		$(this).addClass('x');
+		$('#pay_method').val($(this).attr('pay_method'));
+	});
+	$('.btn').click(function(){
+		if (!$('#pay_method').val().length) {
+			$.overloadError('请选择支付方式');
+			return;
+		}
+		$('form').submit();
+	});
+});
+</script>

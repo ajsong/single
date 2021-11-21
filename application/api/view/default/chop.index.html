@@ -1,0 +1,131 @@
+{include file="header.html"}
+<body class="gr">
+
+<div class="navBar">
+	<a class="left" href="/wap/?app=member&act=index"><i class="return"></i></a>
+	<div class="titleView-x">我发起的砍价</div>
+</div>
+
+<div class="order-index chop-index">
+	<div class="pullRefresh">
+		<header class="ge-bottom ge-light">
+			<ul class="switchView">
+				<li {if !isset($status)}class="this"{/if}><a href="/wap/?app=chop&act=index">全部</a></li>
+				<li {if isset($status) && $status=='0'}class="this"{/if}><a href="/wap/?app=chop&act=index&status=0">砍价中</a></li>
+				<li {if isset($status) && $status==1}class="this"{/if}><a href="/wap/?app=chop&act=index&status=1">砍价成功</a></li>
+				<li {if isset($status) && $status==-1}class="this"{/if}><a href="/wap/?app=chop&act=index&status=-1">砍价失败</a></li>
+			</ul>
+		</header>
+		
+		{if count($data)>0}
+		<ul class="list tableView tableView-noLine">
+			{foreach from=$data item=g}
+			<li>
+				<div class="view">
+					<a href="?app=chop&act=detail&order_sn={$g->order_sn}">
+						<div class="status ge-bottom ge-light status{$g->status}"><div>{$g->status_name}</div></div>
+						<ul>
+							{foreach from=$g->goods item=p}
+							<li>
+								<div class="gview">
+									<div class="pic" url="{$p->goods_pic}"></div>
+									<div class="name">{$p->goods_name}</div>
+									<div class="price"><div>￥{number_format($p->price,2,'.','')}</div></div>
+								</div>
+							</li>
+							{/foreach}
+						</ul>
+					</a>
+					<div class="total">
+						{if $g->status==0}
+						<a class="pay" href="?app=chop&act=detail&order_sn={$g->order_sn}"><span>继续砍价</span></a>
+						{/if}
+						{if $g->status==1}
+						<a class="pay" href="?app=chop&act=detail&order_sn={$g->order_sn}"><span>立即购买</span></a>
+						{/if}
+						{if $g->status==-1}
+						<a class="pay" href="?app=chop&act=detail&order_sn={$g->order_sn}"><span>重砍一个</span></a>
+						{/if}
+						<a class="chop" href="?app=chop&act=detail&order_sn={$g->order_sn}"><span>砍价详情</span></a>
+						{if $g->status!=1}<div>离底价还差 <strong>{number_format($g->remain_price,2,'.','')}</strong> 元</div>{/if}
+					</div>
+				</div>
+			</li>
+			{/foreach}
+		</ul>
+		{else}
+		<div class="norecord">当前没有任何砍价</div>
+		{/if}
+	</div>
+</div>
+
+{include file="footer.html"}
+<script>
+var offset = $('.pullRefresh .list > li').length;
+function createHtml(g){
+	var html = '<li>\
+		<div class="view">\
+			<a href="?app=chop&act=detail&order_sn='+g.order_sn+'">\
+				<div class="status ge-bottom ge-light status'+g.status+'"><div>'+g.status_name+'</div></div>\
+				<ul>';
+				for(var i=0; i<g.goods.length; i++){
+				html += '<li>\
+						<div class="gview">\
+							<div class="pic" url="'+g.goods[i].goods_pic+'"></div>\
+							<div class="name">'+g.goods[i].goods_name+'</div>\
+							<div class="price"><div>￥'+g.goods[i].price.numberFormat(2)+'</div></div>\
+						</div>\
+					</li>';
+				}
+				html += '</ul>\
+			</a>\
+			<div class="total">\
+				'+(g.status==0?'<a class="pay" href="?app=chop&act=detail&order_sn='+g.order_sn+'"><span>继续砍价</span></a>':'')+'\
+				'+(g.status==1?'<a class="pay" href="?app=chop&act=detail&order_sn='+g.order_sn+'"><span>立即购买</span></a>':'')+'\
+				'+(g.status==-1?'<a class="pay" href="?app=chop&act=detail&order_sn='+g.order_sn+'"><span>重砍一个</span></a>':'')+'\
+				<a class="chop" href="?app=chop&act=detail&order_sn='+g.order_sn+'"><span>砍价详情</span></a>\
+				'+(g.status!=1?'<div>离底价还差 <strong>'+g.remain_price.numberFormat(2)+'</strong> 元</div>':'')+'\
+			</div>\
+		</div>\
+	</li>';
+	offset++;
+	return html;
+}
+function setInfo(){
+	if($('.gview .pic').length)$('.gview .pic').loadbackground();
+	$('.tableView .total strong').priceFont('bigPrice');
+	$('.gview .price div').priceFont('bigPrice');
+}
+$(function(){
+	setInfo();
+	$('.switchView').switchView({ column:'column', index:$('.switchView .this').index() });
+	$('.pullRefresh').pullRefresh({
+		header : true,
+		footer : true,
+		footerNoMoreText : '- END -',
+		refresh : function(fn){
+			var _this = this;
+			offset = 0;
+			$.getJSON('/api/?app=chop&act=index{if isset($status)}&status={$status}{/if}', function(json){
+				if(json.error!=0){ $.overloadError(json.msg);return }
+				var html = '';
+				if($.isArray(json.data))for(var i=0; i<json.data.length; i++)html += createHtml(json.data[i]);
+				_this.find('.tableView').html(html);
+				setInfo();
+				fn();
+			});
+		},
+		load : function(fn){
+			var _this = this;
+			$.getJSON('/api/?app=chop&act=index{if isset($status)}&status={$status}{/if}', { offset:offset }, function(json){
+				if(json.error!=0){ $.overloadError(json.msg);return }
+				var html = '';
+				if($.isArray(json.data))for(var i=0; i<json.data.length; i++)html += createHtml(json.data[i]);
+				_this.find('.tableView').append(html);
+				setInfo();
+				fn();
+			});
+		}
+	});
+});
+</script>

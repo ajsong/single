@@ -1,0 +1,117 @@
+{include file="header.html"}
+<body class="gr">
+
+<div class="navBar">
+	<a class="left" href="javascript:history.back()"><i class="return"></i></a>
+	<div class="titleView-x">发表评价</div>
+</div>
+
+<form action="/api/?app=order&act=comment" method="post">
+<input type="hidden" name="goalert" value="感谢你的评价" />
+<input type="hidden" name="gourl" value="/wap/?app=order&act=detail&id={$data.order_id}" />
+<input type="hidden" name="id" value="{$data.order_id}" />
+<div class="order-comment">
+	{foreach from=$data.goods item=g}
+	<div class="view">
+		<div class="info ge-bottom ge-light">
+			<div class="pic" url="{$g->goods_pic}"></div>
+			<div class="stars"><i></i><i></i><i></i><i></i><i></i></div>
+			<input type="hidden" name="stars[]" value="5" class="stars" />
+			<input type="hidden" name="order_goods_id[]" value="{$g->id}" />
+			<div class="tip"></div>
+		</div>
+		<div class="content clear-after">
+			<textarea name="content[]" placeholder="宝贝满足你的期待吗？你的评论能帮助其他小伙伴哦"></textarea>
+			<a href="javascript:void(0)"><i></i><span>添加图片</span></a>
+			<input type="hidden" name="pic[]" />
+		</div>
+	</div>
+	{/foreach}
+	<div class="buttonView">
+		<a href="javascript:void(0)" class="btn pass">发表评价</a>
+	</div>
+</div>
+</form>
+
+{include file="footer.html"}
+<script>
+var tips = ['非常差', '差', '一般', '好', '非常好'];
+function setStars(){
+	var index = this.index();
+	this.parents('.info').find('.tip').html(tips[index]);
+	this.parent().next().val(index+1);
+	this.parent().find('i').removeClass('this').eq(index).addClass('this').prevAll().addClass('this');
+}
+function selectImage(){
+	$('.content a').ajaxupload({
+		url : '/api/?app=other&act=uploadfile',
+		before : function(){
+			this.find('i').addClass('preloader-gray');
+		},
+		callback : function(json){
+			if(json.error!=0){ $.overloadError(json.msg);return }
+			this.find('i').removeClass('preloader-gray');
+			this.css('background-image', 'url('+json.data+')').next().val(json.data);
+		}
+	});
+}
+$(function(){
+	if(!$.browser.wx)selectImage();
+	$('.info .pic').loadbackground();
+	$('input.stars').each(function(){
+		setStars.call($(this).prev().find('i:last'));
+	});
+	$('div.stars i').click(function(){
+		setStars.call($(this));
+	});
+	$('.buttonView .btn').click(function(){
+		if(!$('#content').val().length){
+			//alert('请输入评价内容');
+			//return false;
+		}
+		$('form').submit();
+	});
+});
+{if isset($weixin_sign_package)}
+wx.config({
+	debug: false,
+	appId: "{$weixin_sign_package.appId}",
+	timestamp: "{$weixin_sign_package.timestamp}",
+	nonceStr: "{$weixin_sign_package.nonceStr}",
+	signature: "{$weixin_sign_package.signature}",
+	jsApiList: [
+		'chooseImage',
+		'uploadImage'
+	]
+});
+wx.ready(function(){
+	$('.content a').click(function(){
+		var _this = $(this);
+		wx.chooseImage({
+			success : function(res){
+				var localId = res.localIds; //返回选定照片的本地ID列表，localId可以作为img标签的src属性显示图片
+				_this.find('i').addClass('preloader-gray');
+				setTimeout(function(){
+					wx.uploadImage({
+						localId: localId.toString(), //需要上传的图片的本地ID，由chooseImage接口获得
+						isShowProgressTips: 0, //默认为1，显示进度提示
+						success: function(res){
+							var serverId = res.serverId; //返回图片的服务器端ID
+							$.postJSON('/api/?app=member&act=wx_avatar', { avatar:serverId }, function(json){
+								if(json.error!=0){ $.overloadError(json.msg);return }
+								_this.find('i').removeClass('preloader-gray');
+								_this.css('background-image', 'url('+json.data+')').next().val(json.data);
+							});
+						},
+						fail: function(res){
+							_this.find('i').removeClass('preloader-gray');
+							alert($.debug(res));
+						}
+					});
+				}, 100);
+			}
+		});
+	});
+});
+{/if}
+</script>

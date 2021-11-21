@@ -1,0 +1,31 @@
+{include file="header.html"}
+<body class="gr">
+
+<div class="navBar">
+	<a class="left" href="/wap/?app=member&act=money"><i class="return"></i></a>
+	<div class="titleView-x">余额充值</div>
+</div>
+
+<div class="recharge-index">
+	<ul>
+		{foreach from=$data.recharges name=g item=g}
+		<li>
+			<a href="/wap/?app=recharge&act=commit&id={$g->id}">
+				<div>马上<br />充值</div>
+				<strong>{$g->price}</strong>
+				{if $g->bonus>0}<span>充值{$g->price} 送{$g->bonus}</span>{/if}
+			</a>
+		</li>
+		{/foreach}
+	</ul>
+</div>
+
+{include file="footer.html"}
+<script>
+$(function(){
+	$('.recharge-index li strong').each(function(){
+		var html = $(this).html();
+		$(this).html('￥'+html.numberFormat(2)).priceFont('bigPrice');
+	});
+});
+</script>

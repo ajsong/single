@@ -1,0 +1,21 @@
+{include file="header.html"}
+<body class="gr">
+
+<div class="navBar">
+	<a class="left" href="javascript:history.back()"><i class="return"></i></a>
+	<div class="titleView-x">已邀请用户</div>
+</div>
+
+<div class="commission-invite">
+	<ul>
+		{foreach from=$data name=g item=g}
+		<li>
+			<span class="scale9-right">{$g->reg_time}</span>
+			<div style="background-image:url({$g->avatar});"></div>
+			<font>{if $g->name!=''}{$g->name}{else}{$g->nick_name}{/if}</font>
+		</li>
+		{/foreach}
+	</ul>
+</div>
+
+{include file="footer.html"}

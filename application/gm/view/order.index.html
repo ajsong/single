@@ -1,0 +1,191 @@
+{include file="header.html"}
+
+<div class="page-header">
+	<h6>
+		订单管理
+		<small>
+			<i class="ace-icon fa fa-angle-double-right"></i>
+			订单列表
+		</small>
+		<div>
+			<a href="javascript:void(0)" mark="export" class="dialog" skip="check">导出订单</a>
+			<!--<a href="?app=order&act=shop_ranks" target="_blank">门店收入排行</a>-->
+		</div>
+	</h6>
+</div>
+
+<form class="form-inline" action="?" method="get">
+<input type="hidden" name="app" id="app" value="{$app}" />
+<input type="hidden" name="act" id="act" value="{$act}" />
+<input type="hidden" name="export" id="export" value="" />
+<input type="hidden" name="integral_order" id="integral_order" value="{$integral_order}" />
+<input type="text" class="input-medium" placeholder="关键词，会员名称/地址/电话/单号等" name="keyword" value="{$keyword}" style="width:250px;" />
+{if in_array('groupbuy', $function) || in_array('purchase', $function) || in_array('chop', $function)}
+<select name="type" id="type" class="form-control">
+<option value=""> 订单类型 </option>
+<option value="0" {if $type=="0"}selected{/if}>普通订单</option>
+{if in_array('groupbuy', $function)}<option value="1" {if $type=="1"}selected{/if}>团购订单</option>{/if}
+{if in_array('purchase', $function)}<option value="2" {if $type=="2"}selected{/if}>秒杀订单</option>{/if}
+{if in_array('chop', $function)}<option value="3" {if $type=="3"}selected{/if}>砍价订单</option>{/if}
+</select>
+{/if}
+<select name="pay_method" id="pay_method" class="form-control">
+<option value=""> 支付方式 </option>
+<option value="wxpay" {if $pay_method=="wxpay"}selected{/if}>APP内微信支付</option>
+<option value="wxpay_h5" {if $pay_method=="wxpay_h5"}selected{/if}>服务号内支付</option>
+<option value="wxpay_mini" {if $pay_method=="wxpay_mini"}selected{/if}>小程序内支付</option>
+<option value="alipay" {if $pay_method=="alipay"}selected{/if}>支付宝支付</option>
+</select>
+<select name="status" id="status" class="form-control">
+<option value=""> 订单状态 </option>
+<option value="0" {if $status=="0"}selected{/if}>未支付</option>
+<option value="1" {if $status==1}selected{/if}>已支付</option>
+<option value="2" {if $status==2}selected{/if}>已发货</option>
+<option value="3" {if $status==3}selected{/if}>完成（已收货）</option>
+<option value="4" {if $status=="4"}selected{/if}>已完成（已评价）</option>
+<option value="-1" {if $status==-1}selected{/if}>已取消</option>
+<option value="-2" {if $status==-2}selected{/if}>已退款</option>
+<option value="-3" {if $status==-3}selected{/if}>已退货</option>
+</select>
+{if is_array($shops)}
+<select name="shop_id" id="shop_id" class="form-control" search="true">
+<option value="">门店</option>
+{foreach from=$shops item=shop}
+<option value="{$shop->id}" {if $shop->id==$shop_id}selected{/if}>{$shop->name}</option>
+{/foreach}
+</select>
+{/if}
+<button type="submit" class="btn btn-info btn-sm">
+	<i class="ace-icon fa fa-search bigger-110"></i>搜索
+</button>
+</form>
+
+<div class="table-content">
+<table id="simple-table" class="table table-striped table-bordered table-hover">
+	<thead>
+		<tr>
+			<th>ID</th>
+			<th>订单单号</th>
+			<th>商品</th>
+			<!--<th>门店</th>-->
+			<th>下单人</th>
+			<th>电话</th>
+			<th>服务地址</th>
+			<th>{if $integral_order==1}总积分{else}总价/元{/if}</th>
+			<!--<th>佣金支付/元</th>-->
+			<!--<th>优惠劵支付/元</th>-->
+			<!--<th>余额支付/元</th>-->
+			<th>支付方式</th>
+			<th>状态</th>
+			<th>下单时间</th>
+			<th>操作</th>
+		</tr>
+	</thead>
+
+	<tbody>
+		{foreach from=$rs item=row name=row}
+		<tr>
+			<td>{$row->id}</td>
+			<td><a href="?app=order&act=edit&id={$row->id}">{$row->order_sn}</a></td>
+			<td>
+				{foreach from=$row->goods item=g}
+				<a href="?app=goods&act=edit&id={$g->goods_id}" target="_blank">
+					<img src="{$g->goods_pic}" width="100" onerror="this.src='/images/nopic.png'" />
+					<!--<span>名称：{$goods->goods_name|truncate:10}</span>
+					<span>数量：{$goods->quantity}</span>
+					<span>价格：{$goods->price}</span>-->
+				</a>
+				{/foreach}
+			</td>
+			<!--<td>
+				<a href="?app=shop&act=edit&id={$row->shop_id}" target="_blank">{$row->shop_name}</a>
+			</td>-->
+			<td><a href="?app=member&act=edit&id={$row->member_id}" target="_blank">{$row->member_name}</a></td>
+			<td>{$row->mobile}</td>
+			<td>{$row->address}</td>
+			<td>{if $integral_order==1}{intval($row->total_price)}{else}{$row->total_price}{/if}</td>
+			<!--<td>{$row->used_commission}</td>-->
+			<!--<td>{$row->used_coupon}</td>-->
+			<!--<td>{$row->used_money}</td>-->
+			<td align="center">
+				{if $row->pay_method=='wxpay'}APP内微信支付
+				{else if $row->pay_method=='wxpay_h5'}服务号内支付
+				{else if $row->pay_method=='wxpay_mini'}小程序内支付
+				{else if $row->pay_method=='alipay'}支付宝支付
+				{else if $row->pay_method=='yue'}余额支付
+				{else if $row->pay_method=='integral'}积分兑换{/if}</td>
+			<td align="center">
+				{if $row->status==0}未支付
+				{else if $row->status==1}已支付
+				{else if $row->status==2}已发货
+				{else if $row->status==3}完成（已收货）
+				{else if $row->status==4}完成（已评价）
+				{else if $row->status==-1}取消
+				{else if $row->status==-2}退款
+				{else if $row->status==-3}退货{/if}</td>
+			<td>{$row->add_time}</td>
+			<td>
+				<a href="?app=order&act=edit&id={$row->id}">
+					<button type="button" class="btn btn-xs btn-info">
+					<i class="ace-icon fa fa-pencil bigger-120"></i>
+				</button>
+				</a>
+
+				<a href="?app=order&act=print_order&order_id={$row->id}" target="_blank">
+					<button class="btn btn-xs ">
+					<i class="ace-icon fa fa-print bigger-120"></i>
+				</button>
+				</a>
+
+			</td>
+		</tr>
+		{foreachelse}
+		<tr bgcolor="white"><td colspan="13" height="50">暂无记录</td></tr>
+		{/foreach}
+
+	</tbody>
+</table>
+</div>
+<div class="mypage">
+	<!--已支付金额：￥{$paid_price}元 &nbsp;    余额支付金额：￥{$yue_paid_price}元 &nbsp; -->
+	共 {$sharepage.num_records} 个记录  {$sharepage.current_page} / {$sharepage.num_pages} 页  {$sharepage.first_page} {$sharepage.prev} {$sharepage.nav} {$sharepage.next} {$sharepage.last_page}
+</div>
+
+{include file="footer.html"}
+<script>
+$(function(){
+	$('#begin_date').datepicker();
+	$('#end_date').datepicker();
+	$('.selectpicker').selectpicker({ isPicker:false });
+	$('.page-header .dialog').click(function(){
+		//if(!!!$(this).attr('skip') && !$('.checkbox:checked').length){ alert('请选择需要修改的记录');return }
+		var mark = $(this).attr('mark');
+		if(mark=='export'){
+			$('#export').val(1);
+			$('form.form-inline').submit();
+			setTimeout(function(){ $('#export').val('') }, 10);
+			return;
+		}
+		//$('#cate_type').val(mark);
+		//$('#to-'+mark).modal();
+	});
+	$('.get-to').click(function(){
+		var model = $(this).parents('.modal').eq(0), id = model.attr('id');
+		switch(id){
+			case 'to-remark1':
+				if(!model.find('#remark1').val().length){ alert('请填写备注内容');return }
+				break;
+			case 'to-remark2':
+				if(!model.find('#remark2').val().length){ alert('请填写备注内容');return }
+				break;
+			case 'to-status':
+				if(!model.find('#status').selected().val().length){ alert('请选择状态');return }
+				break;
+			case 'to-import':
+				if(!model.find('#file').val().length){ alert('请选择需要导入的Excel文件');return }
+				break;
+		}
+		$('#tochange').submit();
+	});
+});
+</script>

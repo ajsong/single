@@ -1,0 +1,19 @@
+{include file="header.html"}
+<body>
+
+<div class="navBar">
+	<a class="left" href="/wap/?app=member&act=index"><i class="return"></i></a>
+	<div class="titleView-x">下单成功</div>
+</div>
+
+<div class="cart-pay">
+	<i></i>
+	<div class="tip">恭喜您，下单成功</div>
+	<div class="font">我们将尽快为您配送</div>
+
+	<div class="buttonView">
+		<a class="btn" href="/wap/?app=order&act=detail{if isset($integral_order)}&integral_order=1{/if}&order_sn={$order_sn}">查看订单详情</a>
+	</div>
+</div>
+
+{include file="footer.html"}

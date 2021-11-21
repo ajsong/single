@@ -1,0 +1,76 @@
+{include file="header.html"}
+
+<div class="page-header">
+	<h6>
+		系统设置
+		<small>
+			<i class="ace-icon fa fa-angle-double-right"></i>
+			开通的城市
+		</small>
+	</h6>
+</div>
+
+<form class="form-inline" action="?" method="get">
+<input type="hidden" name="app" id="app" value="{$app}" />
+<input type="hidden" name="act" id="act" value="{$act}" />
+<input type="text" class="input-medium" placeholder="关键词" name="keyword" value="{$keyword}" />
+<input type="text" class="input-medium" placeholder="城市编码" name="city_id" value="{$city_id}" />
+
+<button type="submit" class="btn btn-info btn-sm">
+	<i class="ace-icon fa fa-search bigger-110"></i>搜索
+</button>
+</form>
+
+<div class="table-content">
+<table id="simple-table" class="table table-striped table-bordered table-hover">
+	<thead>
+		<tr>
+			<th>ID</th>
+			<th>城市名称</th>
+			<th>拼音</th>
+			<th>城市编码</th>
+			<th>首字母</th>
+			<th>状态</th>
+			<th>开通的区域</th>
+		</tr>
+	</thead>
+
+	<tbody>
+		{foreach from=$rs item=row name=row}
+		<tr>
+			<td>{$row->id}</td>
+			<td>{$row->name}</td>
+			<td>{$row->pinyin}</td>
+			<td>{$row->city_id}</td>
+			<td>{$row->first_letter}</td>
+			<td>{if $row->opening==1}<span style="color:#ddd;">正在开通城市</span>{else}已开通{/if}</td>
+			<td>
+				<a href="?app=setting&act=district&city_id={$row->city_id}">
+					<button class="btn btn-xs btn-success">
+					<i class="ace-icon fa fa-flag bigger-120"></i>
+				</button>
+				</a>
+				<a href="?app=city&act=edit&id={$row->id}">
+					<button type="button" class="btn btn-xs btn-info">
+					<i class="ace-icon fa fa-pencil bigger-120"></i>
+				</button>
+				</a>
+				<a href="?app=city&act=delete&id={$row->id}" class="delete">
+					<button type="button" class="btn btn-xs btn-danger">
+					<i class="ace-icon far fa-trash-alt bigger-120"></i>
+				</button>
+				</a>
+			</td>
+		</tr>
+		{foreachelse}
+		<tr bgcolor="white"><td colspan="13" height="50">暂无记录</td></tr>
+		{/foreach}
+
+	</tbody>
+</table>
+</div>
+<div class="mypage">
+	共 {$sharepage.num_records} 个记录  {$sharepage.current_page} / {$sharepage.num_pages} 页  {$sharepage.first_page} {$sharepage.prev} {$sharepage.nav} {$sharepage.next} {$sharepage.last_page}
+</div>
+{include file="footer.html"}
+

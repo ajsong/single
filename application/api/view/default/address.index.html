@@ -1,0 +1,101 @@
+{include file="header.html"}
+<body class="gr">
+
+<div class="navBar">
+	<a class="left" href="javascript:history.back()"><i class="return"></i></a>
+	<div class="titleView-x">收货地址管理</div>
+	<a class="right" href="/wap/?app=address&act=add"><span>添加</span></a>
+</div>
+
+<div class="address-list">
+	<div class="pullRefresh">
+		<section>
+			{foreach from=$data name=g item=g}
+			<ul class="list tableView tableView-noLine">
+				<li address_id="{$g->id}">
+					<h1>
+						<div class="name">{$g->contactman}　{$g->mobile}</div>
+						<div class="address">{$g->province}{if $g->province!=$g->city} {$g->city}{/if} {$g->district} {$g->address}</div>
+					</h1>
+					<div class="bottomView ge-top ge-light">
+						<form method="post" action="/api/?app=address&act=delete">
+						<input type="hidden" name="gourl" value="/wap/?app=address&&act=index" />
+						<input type="hidden" name="id" value="{$g->id}" />
+						<a href="javascript:void(0)" class="btn delete"><span>删除</span></a>
+						</form>
+						<a href="/wap/?app=address&act=edit&id={$g->id}" class="btn edit"><span>编辑</span></a>
+						<form method="post" action="/api/?app=address&act=set_default">
+						<input type="hidden" name="gourl" value="/wap/?app=address&&act=index" />
+						<input type="hidden" name="id" value="{$g->id}" />
+						<a href="javascript:void(0)" class="default {if $g->is_default==1}default-x{/if}">设为默认地址</a>
+						</form>
+					</div>
+				</li>
+			</ul>
+			{/foreach}
+		</section>
+	</div>
+</div>
+
+{include file="footer.html"}
+<script>
+var offset = $('.pullRefresh .list > li').length;
+function createHtml(g){
+	var html = '<li>\
+		<h1>\
+			<div class="name">'+g.contactman+'　'+g.mobile+'</div>\
+			<div class="address">'+(g.province+(g.province!=g.city?' '+g.city:'')+' '+g.district+' '+g.address)+'</div>\
+		</h1>\
+		<div class="ge-bottom ge-light"></div>\
+		<div class="bottomView">\
+			<form method="post" action="/api/?app=address&act=delete">\
+			<input type="hidden" name="gourl" value="/wap/?app=address&&act=index" />\
+			<input type="hidden" name="id" value="'+g.id+'" />\
+			<a href="javascript:void(0)" class="btn delete"><span>删除</span></a>\
+			</form>\
+			<a href="/wap/?app=address&act=edit&id='+g.id+'" class="btn edit"><span>编辑</span></a>\
+			<form method="post" action="/api/?app=address&act=set_default">\
+			<input type="hidden" name="gourl" value="/wap/?app=address&&act=index" />\
+			<input type="hidden" name="id" value="'+g.id+'" />\
+			<a href="javascript:void(0)" class="default">设为默认地址</a>\
+			</form>\
+		</div>\
+	</li>';
+	offset++;
+	return html;
+}
+$(function(){
+	$('.pullRefresh').pullRefresh({
+		header : true,
+		footer : true,
+		footerNoMoreText : '- END -',
+		refresh : function(fn){
+			var _this = this;
+			offset = 0;
+			$.getJSON('/api/?app=address&act=index', function(json){
+				if(json.error!=0){ $.overloadError(json.msg);return; }
+				var html = '';
+				if($.isArray(json.data))for(var i=0; i<json.data.length; i++)html += createHtml(json.data[i]);
+				_this.find('.list').html(html);
+				fn();
+			});
+		},
+		load : function(fn){
+			var _this = this;
+			$.getJSON('/api/?app=address&act=index', { offset:offset }, function(json){
+				if(json.error!=0){ $.overloadError(json.msg);return; }
+				var html = '';
+				if($.isArray(json.data))for(var i=0; i<json.data.length; i++)html += createHtml(json.data[i]);
+				_this.find('.list').append(html);
+				fn();
+			});
+		}
+	});
+	$(document).on(window.eventType, '.delete', function(){
+		$(this).parent().submit();
+	});
+	$(document).on('click', '.default', function(){
+		$(this).parent().submit();
+	});
+});
+</script>

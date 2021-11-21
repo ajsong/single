@@ -1,0 +1,181 @@
+{include file="header.html"}
+<body class="gr">
+
+<div class="navBar">
+	<a class="left" href="javascript:history.back()"><i class="return"></i></a>
+	<div class="titleView-x">
+		{if isset($groupbuy) && $groupbuy==1}特价拼团
+		{elseif isset($data.category->name)}{$data.category->name}
+		{elseif isset($ext_property) && $ext_property==4}新品发售
+		{elseif isset($integral) && $integral==1}积分商城
+		{else}商品列表
+		{/if}
+	</div>
+	{if isset($integral) && $integral==1}<a class="right" href="/wap/?app=article&act=detail&id=7"><span>积分规则</span></a>{/if}
+</div>
+
+<div class="goods-index">
+	<div class="pullRefresh" category_id="{if isset($category_id)}{$category_id}{/if}">
+		{if (!isset($integral) || $integral!=1) && (!isset($groupbuy) || $groupbuy!=1)}
+		<header class="{if isset($brand_id) && $brand_id>0}brandHeader{/if}">
+			{if isset($brand_id) && $brand_id>0}
+			<div class="brand ge-bottom ge-light">
+				<div class="banner" style="background-image: url({$data.brand->banner});"></div>
+				<div class="title"><div class="pic" style="background-image: url({$data.brand->pic});"></div><span>{$data.brand->name}</span></div>
+			</div>
+			{/if}
+			<ul class="switchView ge-bottom ge-light">
+				<li {if !isset($order_field)}class="this"{/if}>
+					<a href="/wap/?app=goods&act=index{if isset($category_id)}&category_id={$category_id}{/if}{if isset($ext_property)}&ext_property={$ext_property}{/if}{if isset($title)}&title={$title}{/if}">综合</a>
+				</li>
+				<li {if isset($order_field) && $order_field=='sales'}class="this"{/if}>
+					<a href="/wap/?app=goods&act=index{if isset($category_id)}&category_id={$category_id}{/if}{if isset($ext_property)}&ext_property={$ext_property}{/if}&order_field=sales{if isset($order_sort)}&order_sort={if $order_sort=='desc'}asc{else}desc{/if}{/if}{if isset($title)}&title={$title}{/if}">销量</a>
+				</li>
+				<li {if isset($order_field) && $order_field=='price'}class="this"{/if}>
+					<a href="/wap/?app=goods&act=index{if isset($category_id)}&category_id={$category_id}{/if}{if isset($ext_property)}&ext_property={$ext_property}{/if}&order_field=price{if isset($order_sort)}&order_sort={if $order_sort=='desc'}asc{else}desc{/if}{else}&order_sort=asc{/if}{if isset($title)}&title={$title}{/if}">价格</a>
+				</li>
+				<li>
+					<a class="filter" href="javascript:void(0)">筛选</a>
+				</li>
+			</ul>
+		</header>
+		{/if}
+		<ul class="list goods-item">
+			{foreach from=$data.goods item=g}
+			<li>
+				<a href="/wap/?app=goods&act=detail&id={$g->id}{if isset($integral) && $integral==1}&integral=1{/if}">
+					<div class="pic" url="{$g->pic}"></div>
+					<div class="title">
+						<div>{$g->name}</div>
+						{if isset($integral) && $integral==1}
+						<font class="btn"><b>立即兑换</b></font>
+						<span class="integral">{$g->integral}积分</span>
+						{else}
+						<font>{if (!isset($integral) || $integral!=1) && (!isset($groupbuy) || $groupbuy!=1)}{if $g->purchase_price>0}正在秒杀中{/if}{/if}</font>
+						<span><strong>￥{number_format($g->price,2,'.','')}</strong><s>￥{number_format($g->market_price,2,'.','')}</s></span>
+						{/if}
+					</div>
+				</a>
+			</li>
+			{/foreach}
+		</ul>
+	</div>
+</div>
+
+{include file="footer.html"}
+<script>
+var offset = $('.pullRefresh .list > li').length;
+function createHtml(g){
+	var html = '<li>\
+		<a href="/wap/?app=goods&act=detail&id='+g.id+'{if isset($integral) && $integral==1}&integral=1{/if}">\
+			<div class="pic" url="'+g.id+'"></div>\
+			<div class="title">\
+				<div>'+g.name+'</div>\
+				{if isset($integral) && $integral==1}<font class="btn"><b>立即兑换</b></font>\
+				<span class="integral">'+g.integral+'积分</span>{else}\
+				<font>{if (!isset($integral) || $integral!=1) && (!isset($groupbuy) || $groupbuy!=1)}'+(g.purchase_price>0?'正在秒杀中':'')+'{/if}</font>\
+				<span><strong>￥'+g.price.numberFormat(2)+'</strong><s>￥'+g.market_price.numberFormat(2)+'</s></span>{/if}\
+			</div>\
+		</a>\
+	</li>';
+	offset++;
+	return html;
+}
+function setLists(){
+	//var width = Math.floor(($('.pullRefresh').width()-4) / 2);
+	//$('.list li').width(width);
+	$('.list a .pic').loadbackground();
+}
+$(window).resize(setLists);
+$(function(){
+	setLists();
+	//$('header').sticky({ scroller:$('.pullRefresh') });
+	$('.switchView').switchView({ column:'column', index:$('.switchView .this').index() });
+	{if (!isset($integral) || $integral!=1) && (!isset($groupbuy) || $groupbuy!=1)}$('.filter').on(window.eventType, getFilter);{/if}
+	$('.pullRefresh').pullRefresh({
+		header : true,
+		footer : true,
+		footerNoMoreText : '- END -',
+		refresh : function(fn){
+			var _this = this;
+			offset = 0;
+			$.getJSON('/api/?app=goods&act=index{if isset($integral) && $integral==1}&integral=1{/if}{if isset($category_id)}&category_id={$category_id}{/if}{if isset($ext_property)}&ext_property={$ext_property}{/if}{if isset($brand_id)}&brand_id={$brand_id}{/if}{if isset($shop_id)}&shop_id={$shop_id}{/if}{if isset($min_price)}&min_price={$min_price}{/if}{if isset($max_price)}&max_price={$max_price}{/if}{if isset($order_field)}&order_field={$order_field}{/if}{if isset($order_sort)}&order_sort={$order_sort}{/if}{if isset($groupbuy)}&groupbuy={$groupbuy}{/if}', function(json){
+				if(json.error!=0){ $.overloadError(json.msg);return }
+				var html = '';
+				if($.isArray(json.data.goods))for(var i=0; i<json.data.goods.length; i++)html += createHtml(json.data.goods[i]);
+				_this.find('.list').html(html);
+				setLists();
+				fn();
+			});
+		},
+		load : function(fn){
+			var _this = this;
+			$.getJSON('/api/?app=goods&act=index{if isset($integral) && $integral==1}&integral=1{/if}{if isset($category_id)}&category_id={$category_id}{/if}{if isset($ext_property)}&ext_property={$ext_property}{/if}{if isset($brand_id)}&brand_id={$brand_id}{/if}{if isset($shop_id)}&shop_id={$shop_id}{/if}{if isset($min_price)}&min_price={$min_price}{/if}{if isset($max_price)}&max_price={$max_price}{/if}{if isset($order_field)}&order_field={$order_field}{/if}{if isset($order_sort)}&order_sort={$order_sort}{/if}{if isset($groupbuy)}&groupbuy={$groupbuy}{/if}', { offset:offset }, function(json){
+				if(json.error!=0){ $.overloadError(json.msg);return }
+				var html = '';
+				if($.isArray(json.data.goods))for(var i=0; i<json.data.goods.length; i++)html += createHtml(json.data.goods[i]);
+				_this.find('.list').append(html);
+				setLists();
+				fn();
+			});
+		}
+	});
+});
+
+{if (!isset($integral) || $integral!=1) && (!isset($groupbuy) || $groupbuy!=1)}
+function getFilter(){
+	var html = $('.filterView'), has = true;
+	if(!html.length){
+		has = false;
+		html = $('<div class="filterView">\
+			<div class="navBar">\
+				<div class="titleView-x">筛选</div>\
+			</div>\
+			<form onSubmit="return false">\
+			<ul class="tableView tableView-noMargin tableView-light">\
+				{if in_array('category',$function)}<li><h1>\
+					<div class="label">类别</div>\
+					<div>\
+						{if is_array($data.categories) && count($data.categories)}{foreach from=$data.categories item=g}<span><input type="radio" name="category_id" id="category{$g->id}" value="{$g->id}" title="{str_replace("'","\'",$g->name)}" /><label for="category{$g->id}"><div>{str_replace("'","\'",$g->name)}</div></label></span>{/foreach}{else}<span><input type="radio" name="category_id" id="category{$category_id}" value="{$category_id}" title="{if isset($title)}{str_replace("'","\'",$title)}{/if}" /><label for="category{$category_id}"><div>{if isset($title)}{str_replace("'","\'",$title)}{/if}</div></label></span>{/if}\
+						<div class="clear"></div>\
+					</div>\
+				</h1></li>{/if}\
+				<li><h1>\
+					<div class="label">价格</div>\
+					<div>\
+						<font>价格区间(元)</font><font><input type="tel" name="min_price" id="min_price" placeholder="最低价" /> - <input type="tel" name="max_price" id="max_price" placeholder="最高价" /></font>\
+						<div class="clear"></div>\
+					</div>\
+				</h1></li>\
+				{if is_array($data.brands)}<li><h1>\
+					<div class="label">品牌</div>\
+					<div>\
+						{foreach from=$data.brands name=g item=g}<span><input type="radio" name="brand_id" id="brand{$g->id}" value="{$g->id}" /><label for="brand{$g->id}"><div>{str_replace("'","\'",$g->name)}</div></label></span>{/foreach}\
+						<div class="clear"></div>\
+					</div>\
+				</h1></li>{/if}\
+			</ul>\
+			</form>\
+			<div class="bottomView ge-top ge-light">\
+				<a class="btn" href="javascript:void(0)">确定</a><a class="reset gr" href="javascript:void(0)">重置</a>\
+			</div>\
+		</div>');
+	}
+	html.presentView(1);
+	if(!has){
+		var filterView = $('.filterView');
+		filterView.find('.reset').click(function(){
+			filterView.find('form')[0].reset();
+		});
+		filterView.find('.btn').click(function(){
+			var category = filterView.find('[name="category_id"]:checked'), brand = filterView.find('[name="brand_id"]:checked'),
+				title = category.length ? category.attr('title') : '{if isset($title)}{$title}{/if}',
+				min_price = filterView.find('#min_price').val(), max_price = filterView.find('#max_price').val(),
+				category_id = category.length ? category.val() : '{if isset($category_id)}{$category_id}{/if}',
+				brand_id = brand.length ? brand.val() : '';
+			location.href = '/wap/?app=goods&act=index&category_id='+category_id+'{if isset($ext_property)}&ext_property={$ext_property}{/if}&brand_id='+brand_id+'&min_price='+min_price+'&max_price='+max_price+'&title='+title.urlencode();
+		});
+	}
+}
+{/if}
+</script>

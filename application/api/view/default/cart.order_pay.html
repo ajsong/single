@@ -1,0 +1,81 @@
+{include file="header.html"}
+<body>
+
+<div class="navBar">
+	<a class="left" href="/wap/?app=member&act=index"><i class="return"></i></a>
+	<div class="titleView-x">下单成功</div>
+</div>
+
+<div class="cart-pay">
+	<i></i>
+	<div class="tip">恭喜您，下单成功！</div>
+	<div class="font">支付后我们将尽快为您配送</div>
+	<div class="buttonView">
+		<a class="btn" href="/wap/?app=member&act=index">返回会员中心</a>
+		<a class="wx" href="javascript:callpay()">微信支付</a>
+	</div>
+</div>
+
+{include file="footer.html"}
+<script>
+/*
+//调用微信JS api 支付
+function jsApiCall(){
+	WeixinJSBridge.invoke(
+		'getBrandWCPayRequest',
+		{$data},
+		function(res){
+			//WeixinJSBridge.log(res.err_msg);
+			if(res.err_msg && res.err_msg=='get_brand_wcpay_request:ok'){
+				switch(Number('{$order_type}')){
+					case 0:location.href = '/wap/?app=cart&act=order_complete&order_sn={$order_sn}';break;
+					case 1:location.href = '/wap/?app=groupbuy&act=detail&order_sn={$order_sn}';break;
+					case 2:location.href = '/wap/?app=cart&act=order_complete&order_sn={$order_sn}';break;
+					case 3:location.href = '/wap/?app=chop&act=detail&order_sn={$order_sn}';break;
+				}
+			}else if(res.err_msg && res.err_msg=='get_brand_wcpay_request:cancel'){
+				$('.cart-pay a.wx').html('重新支付');
+			}else if(res.errMsg){
+				alert('支付失败，原因：\n'+res.errMsg);
+			}else{
+				alert('支付失败，原因：未知');
+			}
+		}
+	);
+}
+function callpay(){
+	if (typeof WeixinJSBridge == 'undefined'){
+		if( document.addEventListener ){
+			document.addEventListener('WeixinJSBridgeReady', jsApiCall, false);
+		}else if (document.attachEvent){
+			document.attachEvent('WeixinJSBridgeReady', jsApiCall);
+			document.attachEvent('onWeixinJSBridgeReady', jsApiCall);
+		}
+	}else{
+		jsApiCall();
+	}
+}
+*/
+$(function(){
+	$('.r').priceFont('bigPrice');
+	//callpay();
+	orderPay({
+		order_sn: '{$order_sn}',
+		total_price: '{$total_price}',
+		success: function(){
+			switch(Number('{$order_type}')){
+				case 0:location.href = '/wap/?app=cart&act=order_complete&order_sn={$order_sn}';break;
+				case 1:location.href = '/wap/?app=groupbuy&act=detail&order_sn={$order_sn}';break;
+				case 2:location.href = '/wap/?app=cart&act=order_complete&order_sn={$order_sn}';break;
+				case 3:location.href = '/wap/?app=chop&act=detail&order_sn={$order_sn}';break;
+			}
+		},
+		cancel: function(){
+			$('.cart-pay a.wx').html('重新支付');
+		},
+		error: function(res){
+			alert('支付失败，原因：\n'+res.errMsg);
+		}
+	});
+});
+</script>

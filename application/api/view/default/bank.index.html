@@ -1,0 +1,33 @@
+{include file="header.html"}
+<body class="gr">
+
+<div class="navBar">
+	<a class="left" href="javascript:history.back()"><i class="return"></i></a>
+	<div class="titleView-x">银行卡列表</div>
+	<a class="right" href="/wap/?app=bank&act=set"><i class="bank-set"></i></a>
+</div>
+
+<div class="bank-index">
+	<ul class="list">
+		{foreach from=$data item=g}
+		<li>
+			<a href="/wap/?app=bank&act=edit&id={$g->id}">
+				<textarea class="hidden">{json_encode($g)}</textarea>
+				<div>
+					<span class="name">{$g->bank_name}</span>
+					<span class="type">储蓄卡</span>
+					<big>**** **** **** {substr($g->bank_card, -4)}</big>
+				</div>
+			</a>
+		</li>
+		{foreachelse}
+		<div class="norecord">当前没有任何记录</div>
+		{/foreach}
+	</ul>
+
+	<div class="submitView">
+		<a href="/wap/?app=bank&act=edit" class="btn">添加银行卡</a>
+	</div>
+</div>
+
+{include file="footer.html"}

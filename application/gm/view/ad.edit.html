@@ -1,0 +1,172 @@
+{include file="header.html"}
+<style>
+ol{ margin-left:15px; }
+ol li{ font-size:12px; }
+</style>
+<div class="page-header">
+	<h6>
+		广告管理
+		<small>
+			<i class="ace-icon fa fa-angle-double-right"></i>
+			{if $row->id}编辑{else}添加{/if}广告
+		</small>
+	</h6>
+</div>
+<div class="row">
+<div class="col-xs-12">
+	<form class="form-horizontal" role="form" method="post" action="?app=ad&act=edit" enctype="multipart/form-data">
+		<div class="form-group">
+			<label class="col-sm-2 control-label no-padding-right" for="name">广告标题</label>
+			<div class="col-sm-10">
+				<input type="text" id="name" name="name" value="{$row->name}" class="col-xs-6" />
+				<input type="hidden" name="id" value="{$row->id}" />
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label no-padding-right" for="pic">广告图片</label>
+			<div class="col-sm-10">
+				<input type="hidden" name="origin_pic" id="origin_pic" value="{$row->pic}" />
+				<div class="col-file col-xs-3"><input type="file" id="pic" name="pic" value="" /></div>
+				{if $row->pic}<a href="{$row->pic}" target="_blank"><img src="{$row->pic}" height="34" onerror="this.src='/images/nopic.png'" /></a>{/if}
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label no-padding-right" for="ad_type">广告类型</label>
+			<div class="col-sm-10">
+				<select name="ad_type" id="ad_type">
+					<option value="">请选择类型</option>
+					{foreach from=$types item=g}
+					<option value="{$g->name}" memo='{if strlen($g->memo)}{$g->memo}{/if}' {if $row->ad_type==$g->name}selected{/if}>{$g->value}</option>
+					{/foreach}
+				</select>
+				<span class="some-item"></span>
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label no-padding-right" for="ad_content">广告内容</label>
+			<div class="col-sm-10">
+				<input type="text" id="ad_content" name="ad_content" value="{$row->ad_content}" class="col-xs-6" />
+				<span class="some-line">可填写id、链接或关键词</span>
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label no-padding-right" for="position">广告位置</label>
+			<div class="col-sm-10">
+				<select name="position" id="position">
+					<option value="">请选择位置</option>
+					{foreach from=$positions item=g}
+					<option value="{$g->name}" {if $row->position==$g->name}selected{/if}>{$g->value}</option>
+					{/foreach}
+				</select>
+			</div>
+		</div>
+		{if $edition>2}
+		<div class="form-group">
+			<label class="col-sm-2 control-label no-padding-right" for="begin_time">显示时间</label>
+			<div class="col-sm-10">
+				<input type="text" name="begin_time" id="begin_time" placeholder="开始时间" value="{if $row->begin_time>0}{$row->begin_time}{/if}" class="col-xs-2" />
+				<span class="some-item">-</span>
+				<input type="text" name="end_time" id="end_time" placeholder="结束时间" value="{if $row->end_time>0}{$row->end_time}{/if}" class="col-xs-2" />
+				<span class="some-line">不设置即不限制</span>
+			</div>
+		</div>
+		{/if}
+		{if is_array($shop) && count($shop)}
+		<div class="form-group">
+			<label class="col-sm-2 control-label no-padding-right" for="shop_id">所属商家</label>
+			<div class="col-sm-10">
+				<select name="shop_id" id="shop_id">
+					<option value="-1">请选择所属商家</option>
+						<option value="0" {if $row->shop_id == 0}selected{/if}>全站广告</option>
+						{foreach from = $shop item =s}
+						<option value="{$s->id}" {if $row->shop_id == $s->id}selected{/if}>{$s->name}</option>
+						{/foreach}
+				</select>
+				<span class="some-line" style="color:red;">（当shop_id>0，为该商家内的广告，shop_id=0，为全站广告）</span>
+			</div>
+		</div>
+		{/if}
+		<!--
+		<div class="form-group">
+			<label class="col-sm-2 control-label no-padding-right" for="channel"> 投放渠道</label>
+			<div class="col-sm-2">
+				<select name="channel" id="channel" class="form-control">
+					<option value="">请选择投放渠道</option>
+					<option value="0" {if $row->channel==0}selected{/if}>全渠道</option>
+					<option value="1" {if $row->channel==1}selected{/if}>苹果+安卓</option>
+					<option value="2" {if $row->channel==2}selected{/if}>苹果</option>
+					<option value="3" {if $row->channel==3}selected{/if}>安卓</option>
+					<option value="4" {if $row->channel==4}selected{/if}>微信</option>
+					<option value="5" {if $row->channel==5}selected{/if}>web</option>
+				</select>
+			</div>
+		</div>
+		-->
+		{if $edition>1}
+		<div class="form-group">
+			<label class="col-sm-2 control-label no-padding-right" for="offer"></label>
+			<div class="col-sm-10">
+				<div class="checkbox">
+					<label>
+						<input type="checkbox" name="offer" value="1" class="ace" />
+						<span class="lbl"> 同时发送站内消息 </span>
+					</label>
+				</div>
+			</div>
+		</div>
+		{/if}
+		<div class="form-group">
+			<label class="col-sm-2 control-label no-padding-right" for="status">状态</label>
+			<div class="col-sm-10">
+				<div class="radio">
+					<label>
+						<input type="radio" name="status" value="1" class="ace" {if $row->status == 1 }checked{/if}/>
+						<span class="lbl"> 显示 </span>
+					</label>
+				</div>
+				<div class="radio">
+					<label>
+						<input type="radio" name="status" value="2" class="ace"  {if $row->status == 2 }checked{/if}/>
+						<span class="lbl"> 隐藏 </span>
+					</label>
+				</div>
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label no-padding-right" for="sort">排序</label>
+			<div class="col-sm-10">
+				<input type="text" id="sort" name="sort" value="{$row->sort}" class="col-xs-2" />
+			</div>
+		</div>
+
+		<div class="clearfix form-actions">
+			<div class="col-md-offset-3 col-md-9">
+				<button class="btn btn-info" type="submit">
+					<i class="ace-icon fa fa-check bigger-110"></i>
+					提交
+				</button>
+
+				&nbsp; &nbsp; &nbsp;
+				<button class="btn" type="reset">
+					<i class="ace-icon fa fa-undo bigger-110"></i>
+					重置
+				</button>
+			</div>
+		</div>
+	</form>
+</div>
+</div>
+
+{include file="footer.html"}
+<script>
+$(function(){
+	$('#begin_time').datepicker();
+	$('#end_time').datepicker();
+	$('#ad_type').change(function(){
+		var selected = $(this).selected(), memo = '';
+		if(!!selected.attr('memo'))memo = selected.attr('memo');
+		$(this).next().html(memo);
+	}).change();
+});
+</script>
+

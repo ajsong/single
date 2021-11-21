@@ -1,0 +1,100 @@
+{include file="header.html"}
+
+<div class="page-header">
+	<h6>
+		充值管理
+		<small>
+			<i class="ace-icon fa fa-angle-double-right"></i>
+			{if $row->id}编辑{else}添加{/if}充值
+		</small>
+	</h6>
+</div>
+<div class="row">
+<div class="col-xs-12">
+	<form class="form-horizontal" role="form" method="post" action="?app=recharge&act=edit" enctype="multipart/form-data">
+		<input type="hidden" id="id" name="id" value="{$row->id}" />
+		<div class="form-group">
+			<label class="col-sm-2 control-label no-padding-right" for="name">名称</label>
+			<div class="col-sm-10">
+				<input type="text" id="name" name="name" value="{$row->name}" class="col-xs-6" />
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label no-padding-right">图片</label>
+			<div class="col-sm-10">
+				<input type="hidden" name="origin_pic" id="origin_pic" value="{$row->pic}" />
+				<div class="col-file col-xs-3"><input type="file" id="pic" name="pic" value="" /></div>
+				{if $row->pic}<img src="{$row->pic}" width="100" onerror="this.src='/images/nopic.png'" />{/if}
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label no-padding-right" for="price">充值金额</label>
+			<div class="col-sm-10">
+				<input type="text" id="price" name="price" value="{if $row->price>0}{$row->price}{/if}" class="col-xs-2" />
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label no-padding-right" for="recharged_money">充值后金额</label>
+			<div class="col-sm-10">
+				<input type="text" id="recharged_money" name="recharged_money" value="{if $row->recharged_money>0}{$row->recharged_money}{/if}" class="col-xs-2" />
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label no-padding-right" for="promotion_begin_time">活动日期</label>
+			<div class="col-sm-10">
+				<input type="text" name="promotion_begin_time" id="promotion_begin_time" value="{if $row->promotion_begin_time>0}{date('Y-m-d',$row->promotion_begin_time)}{/if}" class="col-xs-2" />
+				<span class="some-item">-</span>
+				<input type="text" name="promotion_end_time" id="promotion_end_time" value="{if $row->promotion_end_time>0}{date('Y-m-d',$row->promotion_end_time)}{/if}" class="col-xs-2" />
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label no-padding-right" for="promotion_recharged_money">活动期间充值后总金额</label>
+			<div class="col-sm-10">
+				<input type="text" id="promotion_recharged_money" name="promotion_recharged_money" value="{if $row->promotion_recharged_money>0}{$row->promotion_recharged_money}{/if}" class="col-xs-2" />
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label no-padding-right" for="status">状态</label>
+			<div class="col-sm-10">
+				<div class="radio">
+					<label>
+						<input type="radio" name="status" value="1" class="ace" {if $row->status==1}checked{/if} />
+						<span class="lbl">正常</span></label>
+				</div>
+				<div class="radio">
+					<label>
+						<input type="radio" name="status" value="0" class="ace" {if $row->status==0}checked{/if} />
+						<span class="lbl"> 隐藏 </span>
+					</label>
+				</div>
+			</div>
+		</div>
+
+		<div class="clearfix form-actions">
+			<div class="col-md-offset-3 col-md-9">
+				<button class="btn btn-info" type="submit">
+					<i class="ace-icon fa fa-check bigger-110"></i>
+					提交
+				</button>
+
+				&nbsp; &nbsp; &nbsp;
+				<button class="btn" type="reset">
+					<i class="ace-icon fa fa-undo bigger-110"></i>
+					重置
+				</button>
+			</div>
+		</div>
+	</form>
+</div>
+</div>
+
+{include file="footer.html"}
+<script>
+$(function(){
+	$('#promotion_begin_time').datepicker();
+	$('#promotion_end_time').datepicker();
+	$('#price').on('keyup blur', function(){
+		$('#recharged_money, #promotion_recharged_money').val($(this).val());
+	});
+});
+</script>

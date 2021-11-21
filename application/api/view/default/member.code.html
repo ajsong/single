@@ -1,0 +1,15 @@
+{include file="header.html"}
+<body>
+
+<div class="navBar">
+	<a class="left" href="javascript:history.back()"><i class="return"></i></a>
+	<div class="titleView-x">我的二维码</div>
+</div>
+
+<div class="member-code">
+	<div class="img"><img src="/api/?app=member&act=code&code=1" /></div>
+	<div class="tip">邀请码：{$member->invite_code}</div>
+	<div class="memo">邀请好友注册app账号后，该好友成为你下级用户，好友在每次消费后，你可获得佣金。</div>
+</div>
+
+{include file="footer.html"}

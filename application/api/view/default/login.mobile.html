@@ -1,0 +1,69 @@
+{include file="header.html"}
+<body class="gr">
+
+<div class="login-mobile">
+	<form action="/api/?app=passport&act=set_mobile" method="post">
+	<div class="gray ge-bottom">为了您的账户安全，请绑定手机号</div>
+	<ul class="tableView tableView-noMargin">
+		<li>
+			<h1><input type="text" id="mobile" name="mobile" value="" placeholder="手机号码" /></h1>
+		</li>
+		<li>
+			<h1><div class="code"><a href="javascript:void(0)">获取验证码</a><input type="text" id="code" name="code" value="" placeholder="验证码" /></div></h1>
+		</li>
+		<li>
+			<h1><input type="password" id="password" name="password" value="" placeholder="新密码" /></h1>
+		</li>
+	</ul>
+	</form>
+</div>
+
+<div class="login-mobile-bottomView submitView">
+	<a href="javascript:void(0)" class="btn">提交</a>
+</div>
+{include file="footer.html"}
+<script>
+var _getCode = false, _mobileText = '', _codeText = '', _count = 0, _timer = null;
+function myFn(){
+	if(!$('#mobile').val().length || !$('#code').val().length){
+		$.overloadError('请输入手机号码与验证码');
+		return;
+	}
+	if(!$('#password').val().length){
+		$.overloadError('请输入新密码');
+		return;
+	}
+	$('form').submit();
+}
+$(function(){
+	$('.code a').click(function(){
+		if(_getCode)return false;
+		if(!$('#mobile').val().length){
+			$.overloadError('请输入手机号码');
+			return false;
+		}
+		var _this = $(this).html('<div class="preloader"></div>');
+		_getCode = true;
+		_mobileText = _codeText = '';
+		$.postJSON('/api/?app=passport&act=check_mobile', { mobile:$('#mobile').val() }, function(json){
+			_mobileText = json.data.mobile;
+			_codeText = json.data.code;
+			if($('#mobile').val()=='13544529054')$('#code').val(_codeText);
+			_count = 60;
+			_timer = setInterval(function(){
+				_count--;
+				if (_count<=0) {
+					clearInterval(_timer);_getCode = false;
+					_this.removeClass('disabled').html('再次发送');
+				} else {
+					_this.addClass('disabled').html(_count+'s后重发');
+				}
+			}, 1000);
+		});
+	});
+	$('.btn').click(function(){
+		myFn();
+		return false;
+	});
+});
+</script>

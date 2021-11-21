@@ -1,0 +1,351 @@
+{include file="header.html"}
+<div class="page-header">
+	<h6>
+		优惠劵管理
+		<small>
+			<i class="ace-icon fa fa-angle-double-right"></i>
+			{if $row->id}编辑{else}添加{/if}优惠劵
+		</small>
+	</h6>
+</div>
+<div class="row">
+<div class="col-xs-12">
+	<form class="form-horizontal form" role="form" method="post" action="?app=coupon&act=edit" enctype="multipart/form-data">
+		<input type="hidden" id="id" name="id" value="{$row->id}" />
+		{if is_array($shop)}
+		<div class="form-group">
+			<label class="col-sm-2 control-label no-padding-right" for="shop_id">所属店铺</label>
+			<div class="col-sm-10">
+				<select class="selectpicker" id="shop_id" name="shop_id" search="true">
+					<option value="">请选择</option>
+					{foreach from=$shop item=g}
+					<option value="{$g->id}" {if $g->id==$row->shop_id}selected{/if}>{$g->name}</option>
+					{/foreach}
+				</select>
+			</div>
+		</div>
+		{/if}
+		<div class="form-group">
+			<label class="col-sm-2 control-label no-padding-right" for="name">优惠劵名称</label>
+			<div class="col-sm-10">
+				<input type="text" id="name" name="name" value="{$row->name}" class="col-xs-4" />
+			</div>
+		</div>
+		<div class="form-group m">
+			<label class="col-sm-2 control-label no-padding-right" for="discount">优惠形式</label>
+			<div class="col-sm-10">
+				<div class="col-sm-10 {if $row->coupon_money<0 || $row->coupon_discount<0}hidden{/if}">
+					<div class="radio">
+						<label>
+							<input type="radio" name="discount" value="0" class="discount ace" {if $row->coupon_money>=0}checked{/if} />
+							<span class="lbl"> 定额 </span>
+						</label>
+					</div>
+					<input type="text" id="coupon_money" name="coupon_money" value="{if $row->coupon_money>0}{$row->coupon_money}{/if}" class="col-xs-1 {if $row->coupon_money==0 && $row->coupon_discount>0}hidden{/if}" />
+					<span class="some-block {if $row->coupon_money==0 && $row->coupon_discount>0}hidden{/if}">元</span>
+				</div>
+				<div class="col-sm-10 {if $row->coupon_money<0 || $row->coupon_discount<0}hidden{/if}">
+					<div class="radio">
+						<label>
+							<input type="radio" name="discount" value="1" class="discount ace" {if $row->coupon_discount>0}checked{/if} />
+							<span class="lbl"> 折扣 </span>
+						</label>
+					</div>
+					<input type="text" id="coupon_discount" name="coupon_discount" value="{if $row->coupon_discount>0}{$row->coupon_discount}{/if}" class="col-xs-1 {if $row->coupon_money>=0 && $row->coupon_discount==0}hidden{/if}" />
+					<span class="some-block {if $row->coupon_money>=0 && $row->coupon_discount==0}hidden{/if}">折</span>
+				</div>
+				<div class="col-sm-10">
+					<div class="checkbox">
+						<label>
+							<input type="checkbox" name="all_price" id="all_price" value="1" class="ace" {if $row->coupon_money<0 || $row->coupon_discount<0}checked{/if} />
+							<span class="lbl"> 全额 </span>
+						</label>
+					</div>
+				</div>
+				<span class="some-item all_price {if $row->coupon_money>=0 || $row->coupon_discount>=0}hidden{/if}" style="color:#f00;">请谨慎设置全额优惠券，避免资金损失</span>
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label no-padding-right" for="min">使用条件</label>
+			<div class="col-sm-10">
+				<div class="radio">
+					<label>
+						<input type="radio" name="min" value="1" class="min ace" {if $row->min_price>0}checked{/if}/>
+						<span class="lbl"> 満 </span>
+					</label>
+				</div>
+				<input type="text" id="min_price" name="min_price" value="{if $row->min_price>0}{$row->min_price}{/if}" class="col-xs-1 some-width60 {if $row->min_price==0}hidden{/if}" />
+				<span class="some-block {if $row->min_price==0}hidden{/if}" style="margin-right:15px;">元</span>
+				<div class="radio">
+					<label>
+						<input type="radio" name="min" value="0" class="min ace" {if $row->min_price==0}checked{/if}/>
+						<span class="lbl"> 无门槛 </span>
+					</label>
+				</div>
+				<span class="some-item min_price {if $row->min_price>0}hidden{/if}" style="color:#f00;">请谨慎设置无门槛优惠券，避免资金损失</span>
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label no-padding-right" for="begin_time">有效时间</label>
+			<div class="col-sm-10">
+				<input type="text" id="begin_time" name="begin_time" value="{if $row->begin_time>0}{date('Y-m-d',$row->begin_time)}{/if}" placeholder="留空为无开始时间" class="col-xs-2 {if $row->handy_time>0}hidden{/if}" />
+				<span class="some-item {if $row->handy_time>0}hidden{/if}">-</span>
+				<input type="text" id="end_time" name="end_time" value="{if $row->end_time>0}{date('Y-m-d', $row->end_time)}{/if}" placeholder="留空为无限期" class="col-xs-2 {if $row->handy_time>0}hidden{/if}" style="margin-right:10px;" />
+				<div class="checkbox">
+					<label>
+						<input type="checkbox" id="handy_time_handle" class="ace" {if $row->handy_time>0}checked{/if} />
+						<span class="lbl"> 动态期限 </span>
+					</label>
+				</div>
+				<span class="some-block-inline {if $row->handy_time==0}hidden{/if}">获取后</span>
+				<input type="text" id="handy_time" name="handy_time" value="{if $row->handy_time>0}{$row->handy_time}{/if}" class="col-xs-1 some-width40 {if $row->handy_time==0}hidden{/if}" />
+				<span class="some-block-inline {if $row->handy_time==0}hidden{/if}">天内有效</span>
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label no-padding-right" for="quantity">发放总量</label>
+			<div class="col-sm-10">
+				<input type="text" id="quantity" name="quantity" value="" class="col-xs-1 {if $row->auto_add==1}hidden{/if}" />
+				<span class="some-block {if $row->auto_add==1}hidden{/if}" style="margin-right:10px;">张</span>
+				{if $sn>0}<span class="some-line sn {if $row->auto_add==1}hidden{/if}" style="margin-right:10px;">上次发行<font color="red">{$sn}</font>张</span>{/if}
+				<div class="checkbox">
+					<label>
+						<input type="checkbox" name="auto_add" id="auto_add" value="1" class="ace" {if $row->auto_add==1}checked{/if} />
+						<span class="lbl"> 自动增加 </span>
+					</label>
+				</div>
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label no-padding-right" for="num_per_person">每人限领</label>
+			<div class="col-sm-10">
+				<input type="text" id="num_per_person" name="num_per_person" value="{if $row->num_per_person>0}{$row->num_per_person}{/if}" class="col-xs-1" />
+				<span class="some-block">张</span>
+				<span class="some-line">留空即不限领</span>
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label no-padding-right" for="times">可用次数</label>
+			<div class="col-sm-10">
+				<input type="text" id="times" name="times" value="{if $row->times<0}1{else}{$row->times}{/if}" class="col-xs-1 {if $row->times==-1}hidden{/if}" />
+				<span class="some-block {if $row->times==-1}hidden{/if}" style="margin-right:10px;">次</span>
+				<div class="checkbox">
+					<label>
+						<input type="checkbox" name="unlimited" id="unlimited" value="1" class="ace" {if $row->times<0}checked{/if} />
+						<span class="lbl"> 无限次 </span>
+					</label>
+				</div>
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label no-padding-right" for="day_times">一天内可用次数</label>
+			<div class="col-sm-10">
+				<input type="text" id="day_times" name="day_times" value="{if $row->day_times>0}{$row->day_times}{/if}" class="col-xs-1 {if $row->day_times<=0}hidden{/if}"  />
+				<span class="some-block {if $row->day_times<=0}hidden{/if}" style="margin-right:10px;">次</span>
+				<div class="checkbox">
+					<label>
+						<input type="checkbox" name="day_times_handle" id="day_times_handle" class="ace" value="1" {if $row->day_times<=0}checked{/if} />
+						<span class="lbl"> 无限次 </span>
+					</label>
+				</div>
+			</div>
+		</div>
+		<!--<div class="form-group">
+			<label class="col-sm-2 control-label no-padding-right" for="type">类型</label>
+			<div class="col-sm-10">
+				<select name="type" id="type">
+					<option value="0" {if $row->type==0}selected{/if}>商品优惠券</option>
+					<option value="1" {if $row->type==1}selected{/if}>品牌优惠券</option>
+					<option value="2" {if $row->type==2}selected{/if}>新人注册券</option>
+				</select>
+			</div>
+		</div>-->
+		<!--
+		<div class="form-group">
+			<label class="col-sm-2 control-label no-padding-right" for="offline_use">使用环境</label>
+			<div class="col-sm-10">
+				<div class="radio">
+					<label>
+						<input type="radio" name="offline_use" value="1" class="ace" {if $row->offline_use == 1} checked {/if} />
+						<span class="lbl"> 线下 </span>
+					</label>
+				</div>
+				<div class="radio">
+					<label>
+						<input type="radio" name="offline_use" value="0" class="ace"  {if $row->offline_use == 0} checked {/if} />
+						<span class="lbl"> 线上线下通用 </span>
+					</label>
+				</div>
+			</div>
+		</div>
+		-->
+		<!--
+		<div class="form-group">
+			<label class="col-sm-2 control-label no-padding-right" for="position">使用位置</label>
+			<div class="col-sm-10">
+				<select name="position" id="position">
+					<option value="1" {if $row->position == 1}selected{/if}>通用</option>
+					<option value="2" {if $row->position == 2}selected{/if}>app专享</option>
+					<option value="3" {if $row->position == 3}selected{/if}>微信专享</option>
+					<option value="4" {if $row->position == 4}selected{/if}>app+微信专享</option>
+				</select>
+			</div>
+		</div>
+		-->
+		<div class="form-group">
+			<label class="col-sm-2 control-label no-padding-right" style="text-align:right;" for="status">状态</label>
+			<div class="col-sm-10">
+				<div class="radio">
+					<label>
+						<input type="radio" name="status" value="1" class="ace" {if $row->status==1}checked{/if}/>
+						<span class="lbl"> 正常 </span>
+					</label>
+				</div>
+				<div class="radio">
+					<label>
+						<input type="radio" name="status" value="0" class="ace" {if $row->status==0}checked{/if}/>
+						<span class="lbl"> 隐藏 </span>
+					</label>
+				</div>
+				<div class="radio">
+					<label>
+						<input type="radio" name="status" value="-2" class="ace" {if $row->status==-2}checked{/if}/>
+						<span class="lbl"> 过期 </span>
+					</label>
+				</div>
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label no-padding-right" for="permit_goods">可使用范围</label>
+			<div class="col-sm-10">
+				<div class="radio">
+					<label>
+						<input type="radio" name="permit_goods" value="0" class="permit_goods ace" {if $row->permit_goods==0}checked{/if}/>
+						<span class="lbl"> 所有{if $configs.G_COUPON_PERMIT_CATEGORY==0}商品{else}分类{/if} </span>
+					</label>
+				</div>
+				<div class="radio">
+					<label>
+						<input type="radio" name="permit_goods" value="1" class="permit_goods ace" {if $row->permit_goods==1}checked{/if}/>
+						<span class="lbl"> 指定 </span>
+					</label>
+				</div>
+			</div>
+		</div>
+		<div class="form-group goods-view hidden">
+			<label class="col-sm-2 control-label no-padding-right"><span class="btn-info btn-add" id="add"></span>添加{if $configs.G_COUPON_PERMIT_CATEGORY==0}商品{else}分类{/if}</label>
+			<div class="col-sm-10">
+				<ul id="simple-table" class="goods-list col-sm-5">
+					{foreach from=$goods item=g}
+					<li class="{if $configs.G_COUPON_PERMIT_CATEGORY==0}item{else}row{/if}">
+						{if $configs.G_COUPON_PERMIT_CATEGORY==0}
+						<a class="del" href="javascript:void(0)">－</a>
+						<a href="?app=goods&act=edit&id={$g->id}" target="_blank">
+							<div url="{$g->pic}"></div>
+							<span>{$g->name}</span>
+							<font>￥{$g->price}</font>
+						</a>
+						{else}
+						<a class="del" href="javascript:void(0)">－</a>
+						{implode('<em>»</em>',$g->name)}
+						{/if}
+						<input type="hidden" class="goods_id" name="goods[]" value="{$g->id}" />
+					</li>
+					{/foreach}
+				</ul>
+			</div>
+		</div>
+
+		<div class="clearfix form-actions">
+			<div class="col-md-offset-3 col-md-9">
+				<button class="btn btn-info" type="submit">
+					<i class="ace-icon fa fa-check bigger-110"></i>
+					提交
+				</button>
+
+				&nbsp; &nbsp; &nbsp;
+				<button class="btn" type="reset">
+					<i class="ace-icon fa fa-undo bigger-110"></i>
+					重置
+				</button>
+			</div>
+		</div>
+	</form>
+</div>
+</div>
+<script>
+$(function(){
+	$('.selectpicker').selectpicker({ isPicker:false });
+	$('.discount').click(function(){
+		if($(this).val()==0){
+			$('#coupon_money').removeClass('hidden').next().removeClass('hidden');
+			$('#coupon_discount').addClass('hidden').next().addClass('hidden');
+		}else{
+			$('#coupon_money').addClass('hidden').next().addClass('hidden');
+			$('#coupon_discount').removeClass('hidden').next().removeClass('hidden');
+		}
+	});
+	$('#all_price').change(function(){
+		if(this.checked){
+			$(this).parents('.col-sm-10').eq(0).siblings().addClass('hidden');
+			$('.all_price').removeClass('hidden');
+		}else{
+			$(this).parents('.col-sm-10').eq(0).siblings().removeClass('hidden');
+			$('.all_price').addClass('hidden');
+		}
+	});
+	$('#begin_time').datepicker({ readonly:false });
+	$('#end_time').datepicker({ readonly:false });
+	$('.min').click(function(){
+		if($(this).val()==0){
+			$('#min_price').val('').addClass('hidden').next().addClass('hidden');
+			$('.min_price').removeClass('hidden');
+		}else{
+			$('#min_price').removeClass('hidden').next().removeClass('hidden');
+			$('.min_price').addClass('hidden');
+		}
+	});
+	$('#unlimited').change(function(){
+		if(this.checked)$('#times').addClass('hidden').next().addClass('hidden');
+		else $('#times').removeClass('hidden').next().removeClass('hidden');
+	});
+	$('#handy_time_handle').change(function(){
+		if(this.checked){
+			$('#begin_time').addClass('hidden').next().addClass('hidden').next().addClass('hidden');
+			$('#handy_time').removeClass('hidden').next().removeClass('hidden');
+			$('#handy_time').prev().removeClass('hidden');
+		}else{
+			$('#begin_time').removeClass('hidden').next().removeClass('hidden').next().removeClass('hidden');
+			$('#handy_time').addClass('hidden').next().addClass('hidden');
+			$('#handy_time').prev().addClass('hidden');
+		}
+	});
+	$('#auto_add').change(function(){
+		if(this.checked){
+			$('#quantity').addClass('hidden').next().addClass('hidden');
+			$('.sn').addClass('hidden');
+		}else{
+			$('#quantity').removeClass('hidden').next().removeClass('hidden');
+			$('.sn').removeClass('hidden');
+		}
+	});
+	$('#day_times_handle').click(function(){
+		if(this.checked)$('#day_times').addClass('hidden').next().addClass('hidden');
+		else $('#day_times').removeClass('hidden').next().removeClass('hidden');
+	});
+	$('.permit_goods').click(function(){
+		if($(this).val()==0){
+			$('.goods-view').addClass('hidden');
+		}else{
+			$('.goods-view').removeClass('hidden');
+		}
+	}).filter(':checked').click();
+    $('#add').goodsModal({
+		type : '{if $configs.G_COUPON_PERMIT_CATEGORY==0}goods{else}category{/if}',
+		text : '{if $configs.G_COUPON_PERMIT_CATEGORY==0}商品{else}分类{/if}',
+		api : '{$GM_PATH}{if $configs.G_COUPON_PERMIT_CATEGORY==0}goods{else}category&all=1{/if}&act=index',
+	    target : '#simple-table'
+    });
+});
+</script>
+{include file="footer.html"}

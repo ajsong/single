@@ -1,0 +1,78 @@
+{include file="header.html"}
+<body class="gr">
+
+<div class="navBar">
+	<a class="left" href="/wap/"><i class="return"></i></a>
+	<div class="titleView-x">国家馆</div>
+</div>
+
+<div class="country-index">
+	<div class="pullRefresh">
+		{if count($data)>0}
+		<ul class="list">
+			{foreach from=$data name=g item=g}
+			<li>
+				<a class="scale" href="/wap/?app=goods&act=index&country_id={$g->id}" style="background-image:url({$g->list_pic_big});" small_pic="{$g->list_pic_small}">
+					<div class="name">{$g->name}<span>{$g->name_english}</span></div>
+				</a>
+			</li>
+			{/foreach}
+		</ul>
+		{/if}
+	</div>
+</div>
+
+{include file="footer.html"}
+<script>
+var offset = $('.pullRefresh .list > li').length;
+function createHtml(g){
+	var html = '<li>\
+		<a class="scale" href="/wap/?app=goods&act=index&country_id='+g.id+'" style="background-image:url('+g.list_pic_big+');" small_pic="'+g.list_pic_small+'">\
+			<div class="name">'+g.name+'<span>'+g.name_english+'</span></div>\
+		</a>\
+	</li>';
+	offset++;
+	return html;
+}
+function setLists(){
+	var width = ($('.pullRefresh').width()-6*3) / 2;
+	$('.list li').each(function(i){
+		var _this = $(this);
+		if(!!_this.data('changedSize'))return true;
+		_this.data('changedSize', true);
+		if(i%3)_this.width(width).find('a').css({ 'background-image':'url('+_this.find('a').attr('small_pic')+')' });
+	});
+	$('.list li a').loadbackground();
+}
+$(function(){
+	setLists();
+	$('.pullRefresh').pullRefresh({
+		header : true,
+		footer : true,
+		footerNoMoreText : '- END -',
+		refresh : function(fn){
+			var _this = this;
+			offset = 0;
+			$.getJSON('/api/?app=country&act=index&pagesize=9', function(json){
+				if(json.error!=0){ $.overloadError(json.msg);return }
+				var html = '';
+				if($.isArray(json.data))for(var i=0; i<json.data.length; i++)html += createHtml(json.data[i]);
+				_this.find('.list').html(html);
+				setLists();
+				fn();
+			});
+		},
+		load : function(fn){
+			var _this = this;
+			$.getJSON('/api/?app=country&act=index&pagesize=9', { offset:offset }, function(json){
+				if(json.error!=0){ $.overloadError(json.msg);return }
+				var html = '';
+				if($.isArray(json.data))for(var i=0; i<json.data.length; i++)html += createHtml(json.data[i]);
+				_this.find('.list').append(html);
+				setLists();
+				fn();
+			});
+		}
+	});
+});
+</script>

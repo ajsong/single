@@ -1,0 +1,69 @@
+{include file="header.html"}
+
+<div class="page-header">
+	<h6>
+		充值管理
+		<small>
+			<i class="ace-icon fa fa-angle-double-right"></i>
+			充值列表
+		</small>
+		<div>
+			<a href="?app=recharge&act=add" class="iframe-layer">添加充值</a>
+			<a href="?app=recharge&act=manual_recharge" class="iframe-layer">手动充值</a>
+		</div>
+	</h6>
+</div>
+
+<div class="table-content">
+<table id="simple-table" class="table table-striped table-bordered table-hover">
+	<thead>
+		<tr>
+			<th>ID</th>
+			<!-- <th>图片</th> -->
+			<th>名称</th>
+			<th>充值金额</th>
+			<th>充值后金额</th>
+			<th>活动开始时间</th>
+			<th>活动结束时间</th>
+			<th>活动期间充值后总金额</th>
+			<th>状态</th>
+			<th>操作</th>
+		</tr>
+	</thead>
+
+	<tbody>
+		{foreach from=$rs item=row name=row}
+		<tr>
+			<td>{$row->id}</td>
+			<!-- <td><img src="{if $row->pic !== ''}{$row->pic}{else}/images/nopic.png{/if}" height="100" /></td> -->
+			<td>{$row->name}</td>
+			<td>{$row->price}</td>
+			<td>{$row->recharged_money}</td>
+			<td>{date('Y-m-d',$row->promotion_begin_time)}</td>
+			<td>{date('Y-m-d',$row->promotion_end_time)}</td>
+			<td>{$row->promotion_recharged_money}</td>
+			<td>{if $row->status==1}<font class="fa fa-check"></font>{else}<font class="fa fa-close"></font>{/if}</td>
+			<td>
+				<a href="?app=recharge&act=edit&id={$row->id}">
+					<button type="button" class="btn btn-xs btn-info">
+					<i class="ace-icon fa fa-pencil bigger-120"></i>
+				</button>
+				</a>
+				<a href="?app=recharge&act=delete&id={$row->id}" class="delete">
+					<button type="button" class="btn btn-xs btn-danger">
+					<i class="ace-icon far fa-trash-alt bigger-120"></i>
+				</button>
+				</a>
+			</td>
+		</tr>
+		{foreachelse}
+		<tr bgcolor="white"><td colspan="13" height="50">暂无记录</td></tr>
+		{/foreach}	
+		
+	</tbody>
+</table>
+</div>
+<div class="mypage">
+	共 {$sharepage.num_records} 个记录  {$sharepage.current_page} / {$sharepage.num_pages} 页  {$sharepage.first_page} {$sharepage.prev} {$sharepage.nav} {$sharepage.next} {$sharepage.last_page}
+</div>
+{include file="footer.html"}

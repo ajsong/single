@@ -1,0 +1,162 @@
+{include file="header.html"}
+<body class="gr">
+
+<div class="navBar">
+	<a class="left" href="/wap/?app=member&act=index"><i class="return"></i></a>
+	<div class="titleView-x">我的订单</div>
+</div>
+
+<div class="order-index">
+	<div class="pullRefresh">
+		{if !isset($integral_order)}
+		<header class="ge-bottom ge-light">
+			<ul class="switchView">
+				<li {if !isset($status)}class="this"{/if}><a href="/wap/?app=order&act=index">全部</a></li>
+				<li {if isset($status) && $status=='0'}class="this"{/if}><a href="/wap/?app=order&act=index&status=0">待付款</a></li>
+				<li {if isset($status) && $status==1}class="this"{/if}><a href="/wap/?app=order&act=index&status=1">待发货</a></li>
+				<li {if isset($status) && $status==2}class="this"{/if}><a href="/wap/?app=order&act=index&status=2">待收货</a></li>
+				<li {if isset($status) && $status==3}class="this"{/if}><a href="/wap/?app=order&act=index&status=3">待评价</a></li>
+				<li {if isset($status) && $status==4}class="this"{/if}><a href="/wap/?app=order&act=index&status=4">完成</a></li>
+				<li {if isset($status) && $status=='-1'}class="this"{/if}><a href="/wap/?app=order&act=index&status=-1">取消</a></li>
+				<li {if isset($status) && $status=='-2,-3'}class="this"{/if}><a href="/wap/?app=order&act=index&status=-2,-3">退货/退款</a></li>
+			</ul>
+		</header>
+		{/if}
+		
+		{if count($data)>0}
+		<ul class="list tableView tableView-noLine">
+			{foreach from=$data name=g item=g}
+			<li>
+				<div class="view">
+					<a href="?app=order&act=detail&id={$g->id}&for_pay=1{if isset($integral_order)}&integral_order=1{/if}">
+						<div class="status ge-bottom ge-light status{$g->status}"><font>订单号：{$g->order_sn}</font><div>{$g->status_name}</div>{if $g->status>0 && $g->ask_refund_time>0}<span>(退货退款中)</span>{/if}</div>
+						<ul>
+							{foreach from=$g->goods name=p item=p}
+							<li>
+								<div class="gview">
+									<div class="pic" url="{$p->goods_pic}"></div>
+									<div class="name">{$p->goods_name}</div>
+									{if !isset($integral_order)}
+									<div class="spec">{if strlen($p->spec)}{$p->spec}{/if}</div>
+									<div class="price"><span>×{$p->quantity}</span><div>￥{number_format($p->price,2,'.','')}</div></div>
+									{else}
+									<div class="price"><div>{intval($p->integral)}积分</div></div>
+									{/if}
+								</div>
+							</li>
+							{/foreach}
+						</ul>
+					</a>
+					{if !isset($integral_order)}
+					<div class="total" mid="{$g->id}">
+						{if $g->status==0}
+						<a class="pay" href="?app=order&act=detail&id={$g->id}&for_pay=1"><span>立即支付</span></a>
+						{/if}
+						{if $g->status==1}
+						{if $g->ask_refund_time==0}
+						<a class="refund" href="javascript:void(0)" total_price="{$g->total_price}" status="{$g->status}"><span>我要退款</span></a>
+						{/if}
+						{/if}
+						{if $g->status==2}
+						<a class="ok" href="javascript:void(0)"><span>确认收货</span></a>
+						{/if}
+						<div>总计：<strong>￥{number_format($g->total_price,2,'.','')}</strong> ({if $g->shipping_price>0}含运费￥{number_format($g->shipping_price,2,'.','')}{else}免运费{/if})</div>
+					</div>
+					{/if}
+				</div>
+			</li>
+			{/foreach}
+		</ul>
+		{else}
+		<div class="norecord">当前没有任何订单</div>
+		{/if}
+	</div>
+</div>
+
+{include file="footer.html"}
+<script>
+var offset = $('.pullRefresh .list > li').length;
+function createHtml(g){
+	var html = '<li>\
+		<div class="view">\
+			<a href="?app=order&act=detail&id='+g.id+'&for_pay=1{if isset($integral_order)}&integral_order=1{/if}">\
+				<div class="status ge-bottom ge-light status'+g.status+'"><font>订单号：'+g.order_sn+'</font><div>'+g.status_name+'</div>'+((g.status>0 && g.ask_refund_time>0)?'<span>(退货退款中)</span>':'')+'</div>\
+				<ul>';
+				for(var i=0; i<g.goods.length; i++){
+				html += '<li>\
+						<div class="gview">\
+							<div class="pic" url="'+g.goods[i].goods_pic+'"></div>\
+							<div class="name">'+g.goods[i].goods_name+'</div>\
+							{if !isset($integral_order)}<div class="spec">'+(g.goods[i].spec.length?g.goods[i].spec:'')+'</div>\
+							<div class="price"><span>×'+g.goods[i].quantity+'</span><div>￥'+g.goods[i].price.numberFormat(2)+'</div></div>{else}\
+							<div class="price"><div>'+parseInt(g.goods[i].integral)+'积分</div></div>{/if}\
+						</div>\
+					</li>';
+				}
+				html += '</ul>\
+			</a>\
+			{if !isset($integral_order)}<div class="total" mid="'+g.id+'">';
+				if(g.status==0){
+					html += '<a class="pay" href="?app=order&act=detail&id='+g.id+'&for_pay=1"><span>立即支付</span></a>';
+				}
+				if(g.status==1){
+					if(g.ask_refund_time==0)html += '<a class="refund" href="javascript:void(0)"><span>我要退款</span></a>';
+				}
+				if(g.status==2){
+					html += '<a class="ok" href="javascript:void(0)"><span>确认收货</span></a>';
+				}
+				html += '<div>总计：<strong>￥'+g.total_price.numberFormat(2)+'</strong> ('+(g.shipping_price>0?'含运费￥'+g.shipping_price.numberFormat(2):'免运费')+')</div>';
+			html += '</div>{/if}\
+		</div>\
+	</li>';
+	offset++;
+	return html;
+}
+function setInfo(){
+	if($('.gview .pic').length)$('.gview .pic').loadbackground();
+	$('.tableView .total strong').priceFont('bigPrice');
+	$('.gview .price div').priceFont('bigPrice');
+}
+$(function(){
+	setInfo();
+	$('.switchView').switchView({ column:'column', index:$('.switchView .this').index() });
+	$(document.body).on('click', 'a.refund', function(){
+		location.href = '/wap/?app=order&act=refund&id='+$(this).parent().attr('mid');
+	});
+	$(document.body).on('click', 'a.ok', function(){
+		if(!confirm('请收到货后，再确认收货！\n否则您可能钱货两空'))return false;
+		$.postJSON('/api/?app=order&act=shouhuo', { id:$(this).parent().attr('mid') }, function(json){
+			if(json.error!=0){ $.overloadError(json.msg);return }
+			location.href = location.href;
+		});
+	});
+	$('.pullRefresh').pullRefresh({
+		header : true,
+		footer : true,
+		footerNoMoreText : '- END -',
+		refresh : function(fn){
+			var _this = this;
+			offset = 0;
+			$.getJSON('/api/?app=order&act=index{if isset($status)}&status={$status}{/if}', function(json){
+				if(json.error!=0){ $.overloadError(json.msg);return }
+				var html = '';
+				if($.isArray(json.data))for(var i=0; i<json.data.length; i++)html += createHtml(json.data[i]);
+				_this.find('.tableView').html(html);
+				setInfo();
+				fn();
+			});
+		},
+		load : function(fn){
+			var _this = this;
+			$.getJSON('/api/?app=order&act=index{if isset($status)}&status={$status}{/if}', { offset:offset }, function(json){
+				if(json.error!=0){ $.overloadError(json.msg);return }
+				var html = '';
+				if($.isArray(json.data))for(var i=0; i<json.data.length; i++)html += createHtml(json.data[i]);
+				_this.find('.tableView').append(html);
+				setInfo();
+				fn();
+			});
+		}
+	});
+});
+</script>

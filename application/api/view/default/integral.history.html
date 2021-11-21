@@ -1,0 +1,63 @@
+{include file="header.html"}
+<body class="gr">
+
+<div class="navBar">
+	<a class="left" href="javascript:history.back()"><i class="return"></i></a>
+	<div class="titleView-x">积分明细</div>
+</div>
+
+<div class="commission-history">
+	<div class="pullRefresh">
+		<ul class="list">
+			{foreach from=$data name=g item=g}
+			<li class="ge-bottom ge-light">
+				<div {if strpos($g->integral,'-')!==false}class="r"{/if}>{$g->integral}</div>
+				<span>{$g->memo}</span>
+				<font class="scale10-left">{$g->add_time}</font>
+			</li>
+			{/foreach}
+		</ul>
+	</div>
+</div>
+
+{include file="footer.html"}
+<script>
+var offset = $('.pullRefresh .list > li').length;
+function createHtml(g){
+	var html = '<li class="ge-bottom ge-light">\
+		<div '+(g.integral.indexOf('-')>-1?'class="r"':'')+'>'+g.integral+'</div>\
+		<span>'+g.memo+'</span>\
+		<font class="scale10-left">'+g.add_time+'</font>\
+	</li>';
+	offset++;
+	return html;
+}
+$(function(){
+	$('.pullRefresh').pullRefresh({
+		header : true,
+		footer : true,
+		footerNoMoreText : '- END -',
+		refresh : function(fn){
+			var _this = this;
+			offset = 0;
+			$.getJSON('/api/?app=integral&act=history', function(json){
+				if(json.error!=0){ $.overloadError(json.msg);return }
+				var html = '';
+				if($.isArray(json.data))for(var i=0; i<json.data.length; i++)html += createHtml(json.data[i]);
+				_this.find('.list').html(html);
+				fn();
+			});
+		},
+		load : function(fn){
+			var _this = this;
+			$.getJSON('/api/?app=integral&act=history', { offset:offset }, function(json){
+				if(json.error!=0){ $.overloadError(json.msg);return }
+				var html = '';
+				if($.isArray(json.data))for(var i=0; i<json.data.length; i++)html += createHtml(json.data[i]);
+				_this.find('.list').append(html);
+				fn();
+			});
+		}
+	});
+});
+</script>

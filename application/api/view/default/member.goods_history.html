@@ -1,0 +1,75 @@
+{include file="header.html"}
+<body class="gr">
+
+<div class="navBar">
+	<a class="left" href="javascript:history.back()"><i class="return"></i></a>
+	<div class="titleView-x">足迹</div>
+</div>
+
+<div class="goods-history">
+	<div class="pullRefresh">
+		{if count($data)>0}
+		<ul class="list goods-item">
+			{foreach from=$data name=g item=g}
+			<li>
+				<a href="/wap/?app=goods&act=detail&id={$g->id}">
+					<div class="pic" style="background-image:url({$g->pic});"></div>
+					<div class="title"><div>{$g->name}</div><font>{$g->model}</font><span><strong>￥</strong>{number_format($g->price,2,'.','')}</span></div>
+				</a>
+			</li>
+			{/foreach}
+		</ul>
+		{/if}
+	</div>
+</div>
+
+{include file="footer.html"}
+<script>
+    var offset = $('.pullRefresh .list > li').length;
+    function createHtml(g){
+        var html = '<li>\
+		<a href="/wap/?app=goods&act=detail&id='+g.id+'">\
+			<div class="pic" style="background-image:url('+g.pic+');"></div>\
+			<div class="title"><div>'+g.name+'</div><font>'+g.model+'</font><span><strong>￥</strong>'+g.price.numberFormat(2)+'</span></div>\
+		</a>\
+	</li>';
+        offset++;
+        return html;
+    }
+    function setLists(){
+        $('.list li').width(($('.pullRefresh').width()-4) / 2);
+        $('.list a .pic').loadbackground();
+    }
+    setLists();
+    $(window).resize(setLists);
+    $(function(){
+        $('.pullRefresh').pullRefresh({
+            header : true,
+            footer : true,
+            footerNoMoreText : '- END -',
+            refresh : function(fn){
+                var _this = this;
+                offset = 0;
+                $.getJSON('/api/?app=member&act=goods_history', function(json){
+                    if(json.error!=0){ $.overloadError(json.msg);return }
+                    var html = '';
+                    if($.isArray(json.data))for(var i=0; i<json.data.length; i++)html += createHtml(json.data[i]);
+                    _this.find('.list').html(html);
+                    setLists();
+                    fn();
+                });
+            },
+            load : function(fn){
+                var _this = this;
+                $.getJSON('/api/?app=member&act=goods_history', { offset:offset }, function(json){
+                    if(json.error!=0){ $.overloadError(json.msg);return }
+                    var html = '';
+                    if($.isArray(json.data))for(var i=0; i<json.data.length; i++)html += createHtml(json.data[i]);
+                    _this.find('.list').append(html);
+                    setLists();
+                    fn();
+                });
+            }
+        });
+    });
+</script>

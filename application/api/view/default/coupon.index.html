@@ -1,0 +1,113 @@
+{include file="header.html"}
+<body class="gr">
+
+<div class="navBar">
+	<a class="left" href="/wap/?app=member&act=index"><i class="return"></i></a>
+	<div class="titleView-x">优惠券</div>
+	<!--<a class="right" href="javascript:void(0)"><span>添加</span></a>-->
+</div>
+
+<div class="coupon-index">
+	<div class="pullRefresh">
+		<header class="ge-bottom ge-light">
+			<ul class="switchView">
+				<li {if isset($status) && $status==1}class="this"{/if}>
+					<a href="/wap/?app=coupon&act=index&status=1">有效</a>
+				</li>
+				<li {if isset($status) && $status==0}class="this"{/if}>
+					<a href="/wap/?app=coupon&act=index&status=0">无效</a>
+				</li>
+			</ul>
+		</header>
+		
+		<ul class="list">
+			{foreach from=$data item=g}
+			<li class="type{$g->type} status{$g->status}">
+				<a href="{if $g->status==1}/wap/?app=category&act=index{else}javascript:void(0){/if}">
+					<div class="l">
+						<div><font>￥</font>{$g->coupon_money}</div>
+						<span><tt>{$g->min_price_memo}</tt></span>
+					</div>
+					<div class="r">
+						<strong>{$g->name}</strong>
+						<font><tt>{$g->memo}</tt></font>
+						<span>{if $g->status==1}<div><b>立即使用</b></div>{/if}<span>{$g->time_memo}</span></span>
+					</div>
+					{if $g->type==0}<div class="t t0"></div>
+					{else if $g->type==1}<div class="t"><span>品牌</span></div>
+					{else if $g->type==2}<div class="t"><span>新人</span></div>{/if}
+					{if $g->status<1}<div class="p p{$g->status}"></div>{/if}
+				</a>
+			</li>
+			{/foreach}
+		</ul>
+	</div>
+</div>
+
+{include file="footer.html"}
+<script>
+var offset = $('.pullRefresh .list > li').length;
+function createHtml(g){
+	var html = '<li class="status'+g.status+'">\
+		<div class="l">\
+			<div>￥'+g.coupon_money+'</div>\
+			<span>'+g.min_price_memo+'</span>\
+		</div>\
+		<div class="r">\
+			<div>'+g.name+'<br />'+g.memo+'</div>\
+			<span>'+(g.end_time!='0'?'有效期至 '+g.end_time:'长期有效')+'</span>\
+		</div>\
+		'+(g.status!=1?'<div class="t"></div>':'')+'\
+	</li>';
+	offset++;
+	return html;
+}
+$(function(){
+	$('.switchView').switchView({ column:'column', index:$('.switchView .this').index() });
+	$('.navBar .right').click(function(){
+		var _this = $(this),
+		html = '<div class="coupon-sn" cls="overlay-big" delay-cls="overlay-normal" close-cls="overlay-small">\
+			<div class="tip"><span>添加优惠券</span></div>\
+			<input type="text" placeholder="请输入优惠券号码" />\
+			<a href="javascript:void(0)">确定</a>\
+		</div>';
+		$.overlay(html, 3, function(){
+			$('.coupon-sn a').click(function(){
+				var val = $(this).prev().val();
+				$.postJSON('/api/?app=coupon&act=add', { sn:val }, function(json){
+					if(json.error!=0){ $.overloadError(json.msg);return }
+					$.overlay(false);
+					$.overloadSuccess('添加成功');
+					setTimeout(function(){ location.href=location.href }, 3000);
+				});
+			});
+		});
+	});
+	$('.pullRefresh').pullRefresh({
+		header : true,
+		footer : true,
+		footerNoMoreText : '- END -',
+		refresh : function(fn){
+			var _this = this;
+			offset = 0;
+			$.getJSON('/api/?app=coupon&act=index{if isset($status)}&status={$status}{/if}', function(json){
+				if(json.error!=0){ $.overloadError(json.msg);return }
+				var html = '';
+				if($.isArray(json.data))for(var i=0; i<json.data.length; i++)html += createHtml(json.data[i]);
+				_this.find('.list').html(html);
+				fn();
+			});
+		},
+		load : function(fn){
+			var _this = this;
+			$.getJSON('/api/?app=coupon&act=index{if isset($status)}&status={$status}{/if}', { offset:offset }, function(json){
+				if(json.error!=0){ $.overloadError(json.msg);return }
+				var html = '';
+				if($.isArray(json.data))for(var i=0; i<json.data.length; i++)html += createHtml(json.data[i]);
+				_this.find('.list').append(html);
+				fn();
+			});
+		}
+	});
+});
+</script>

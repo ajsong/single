@@ -1,0 +1,126 @@
+{include file="header.html"}
+
+<div class="page-header">
+	<h6>
+		财务管理
+		<small>
+			<i class="ace-icon fa fa-angle-double-right"></i>
+			提现申请
+		</small>
+	</h6>
+</div>
+
+<form class="form-inline" action="?" method="get">
+<input type="hidden" name="app" id="app" value="{$app}" />
+<input type="hidden" name="act" id="act" value="{$act}" />
+申请时间：<input type="text" class="form-control" name="begin_date" id="begin_date" placeholder="开始日期" value="{$begin_date}" initdate="" style="width:100px;" />
+ -
+<input type="text" class="form-control" name="end_date" id="end_date" placeholder="结束日期" value="{$end_date}" initdate="" style="width:100px;" />
+关键词：<input type="text" class="input-medium" placeholder="关键词" name="keyword" value="{$keyword}" />
+<button type="submit" class="btn btn-info btn-sm">
+	<i class="ace-icon fa fa-search bigger-110"></i>搜索
+</button>
+</form>
+
+<div class="table-content">
+<table id="simple-table" class="table table-striped table-bordered table-hover">
+	<thead>
+		<tr>
+			<th>ID</th>
+			<th>提现门店</th>
+			<th>申请提现金额</th>
+			<th>相关订单</th>
+			<th>操作</th>
+		</tr>
+	</thead>
+
+	<tbody>
+		{foreach from=$rs item=row name=row}
+		<tr>
+			<td>{$row->id}</td>
+			<td><a href="?app=beautyshop&act=edit&beautyshop_id={$row->shop_id}" target="_blank">{$row->shop_name}</a></td>
+			<td>￥{number_format($row->price,2)}</td>
+			<td><a href="?app=finance&act=index&order_id={$row->orders}" target="_blank">查看订单</a></td>
+			<td>
+				{if $row->status=='1'}<font color="blue">已通过</font>{/if}
+				{if $row->status=='-1'}<font color="red">不通过</font>{if $row->memo!=''}<br /><font color="gray">{$row->memo}</font>{/if}{/if}
+				{if $row->status=='0'}
+				<a href="javascript:void(0)" mid="{$row->id}" class="ok">
+					<button type="button" class="btn btn-xs btn-info">
+					<i class="ace-icon fa fa-check bigger-120"></i>
+				</button>
+				</a>
+				<a href="javascript:void(0)" mid="{$row->id}" class="cancel">
+					<button type="button" class="btn btn-xs btn-danger">
+					<i class="ace-icon fa fa-remove bigger-120"></i>
+				</button>
+				</a>
+				{/if}
+			</td>
+		</tr>
+		{foreachelse}
+		<tr bgcolor="white"><td colspan="13" height="50">暂无记录</td></tr>
+		{/foreach}
+
+	</tbody>
+</table>
+</div>
+<div class="mypage">
+	共 {$sharepage.num_records} 个记录  {$sharepage.current_page} / {$sharepage.num_pages} 页  {$sharepage.first_page} {$sharepage.prev} {$sharepage.nav} {$sharepage.next} {$sharepage.last_page}
+</div>
+
+<style>
+.layer{ z-index:1; width:400px; height:220px; background:#fff; border-radius:5px; text-align:center; }
+.layer .tip{ line-height:40px; font-size:14px; font-weight:bold; }
+.layer .reson{ margin-bottom:10px; padding:0 20px; }
+.layer .reson textarea{ border:none; outline:none; resize:none; width:100%; height:126px; background-color:#eaeaea; }
+</style>
+<div class="layer" style="display:none;" close="no">
+	<div class="tip">请填写不通过原因</div>
+	<div class="reson"><textarea class="memo"></textarea></div>
+	<a href="javascript:void(0)">
+	<button class="btn btn-info btn-sm"><i class="ace-icon fa fa-check bigger-110"></i>确定</button>
+	</a>
+	<a href="javascript:void(0)">
+	<button class="btn btn-danger btn-sm"><i class="ace-icon fa fa-remove bigger-110"></i>取消</button>
+	</a>
+</div>
+
+<form class="audit" action="?app=finance&act=audit" method="post">
+<input type="hidden" name="id" id="id" value="" />
+<input type="hidden" name="status" id="status" value="0" />
+<input type="hidden" name="memo" id="memo" value="" />
+</form>
+
+{include file="footer.html"}
+<script>
+$(function(){
+	$('#begin_date').datepicker();
+	$('#end_date').datepicker();
+	$('.layer a:eq(0)').click(function(){
+		if(!$('.memo').val().length){
+			alert('请填写不通过原因');
+			return;
+		}
+		$('#id').val($(this).attr('mid'));
+		$('#memo').val($('.memo').val());
+		$('#status').val('-1');
+		$.overlay(false);
+		$('.audit').submit();
+	});
+	$('.layer a:eq(1)').click(function(){
+		$('.memo, #memo').val('');
+		$.overlay(false);
+	});
+	$('a.ok').click(function(){
+		$('#id').val($(this).attr('mid'));
+		$('.memo, #memo').val('');
+		$('#status').val('1');
+		$('.audit').submit();
+	});
+	$('a.cancel').click(function(){
+		$('.layer a:eq(0)').attr('mid', $(this).attr('mid'));
+		$.overlay('.layer');
+	});
+});
+</script>

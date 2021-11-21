@@ -1,0 +1,27 @@
+@charset "utf-8";
+/* CSS Document */
+@import url("base.css");
+
+/*分页*/
+.pagination{position:relative; text-align:right; margin-top:20px; font-size:0; height:24px; line-height:24px;}
+.pagination span, .pagination a, .pagination input{display:inline-block; vertical-align:top; height:100%; font-size:12px; -webkit-transition:all 0.3s ease-out; transition:all 0.3s ease-out; outline:none;}
+.pagination .ezr_num_records{margin-right:5px;}
+.pagination .ezr_num_record{color:#337ab7; margin:0 3px; font-size:inherit;}
+.pagination .ezr_num{margin-right:5px;}
+.pagination .ezr_num .ezr_num_page, .pagination .ezr_num .ezr_num_pages{font-size:inherit; /*color:#337ab7;*/}
+.pagination .ezr_num .ezr_num_page{margin-right:3px;}
+.pagination .ezr_num .ezr_num_pages{margin:0 3px;}
+.pagination a{box-sizing:border-box; padding:0 5px; margin:0 2px; text-align:center; min-width:24px; border-radius:2px; text-decoration:none; background:#589ad3; color:#fff;}
+.pagination a font{display:block; text-decoration:none; color:inherit; font-size:inherit;}
+.pagination a:not(.ezr_nav_na):hover{background:#337ab7; color:#fff;}
+.pagination a.ezr_nav{/*color:#337ab7;*/}
+.pagination a.ezr_nav_na{background:#ccc; cursor:default;}
+.pagination .ezr_ellipsis{cursor:default; margin:0 2px;}
+.pagination .ezr_first_page, .pagination .ezr_back, .pagination .ezr_next, .pagination .ezr_last_page{/*background:#337ab7;*/}
+.pagination .ezr_btn{margin-left:5px; font-size:0;}
+.pagination .ezr_btn .ezr_input{border-radius:2px; margin-right:2px; text-align:center; box-sizing:border-box; width:44px; color:#858585; background-color:#fff; border:1px solid #b5b5b5;}
+.pagination .ezr_btn .ezr_input:focus{border-color:#f59942;}
+.pagination .ezr_btn .ezr_submit{border:none; color:#fff; width:auto; padding:0 10px; cursor:pointer; overflow:visible; border-radius:2px; background:#589ad3;}
+.pagination .ezr_btn .ezr_submit:hover{background:#337ab7;}
+
+

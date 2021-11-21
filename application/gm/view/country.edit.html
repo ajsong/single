@@ -1,0 +1,113 @@
+{include file="header.html"}
+
+<div class="page-header">
+	<h6>
+		国家馆管理
+		<small>
+			<i class="ace-icon fa fa-angle-double-right"></i>
+			编辑管家馆
+		</small>
+	</h6>
+</div>
+<div class="row">
+<div class="col-xs-12">
+	<form class="form-horizontal" role="form" method="post" action="?app=country&act=edit" enctype="multipart/form-data">
+		<div class="form-group">
+			<label class="col-sm-2 control-label no-padding-right" for="name">国家名称</label>
+			<div class="col-sm-10">
+				<input type="text" id="name" name="name" value="{$row->name}" class="col-xs-6" />
+				<input type="hidden" name="id" value="{$row->id}" />
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label no-padding-right" for="name_english">英文名称</label>
+			<div class="col-sm-10">
+				<input type="text" id="name_english" name="name_english" value="{$row->name_english}" class="col-xs-6" />
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label no-padding-right" for="pic">国家馆详情页图片</label>
+			<div class="col-sm-10">
+				<input type="hidden" name="origin_pic" id="origin_pic" value="{$row->detail_pic}" />
+				<div class="col-file col-xs-3"><input type="file" id="pic" name="pic" value="" /></div>
+				<span class="some-line" style="color:red;">图片比例：2:1</span>
+				{if $row->detail_pic}<a href="{$row->detail_pic}" target="_blank"><img src="{$row->detail_pic}" height="34" onerror="this.src='/images/nopic.png'" /></a>{/if}
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label no-padding-right" for="pic_big">列表大图</label>
+			<div class="col-sm-10">
+				<input type="hidden" name="origin_pic_big" id="origin_pic_big" value="{$row->list_pic_big}" />
+				<div class="col-file col-xs-3"><input type="file" id="pic_big" name="pic_big" value="" /></div>
+				<span class="some-line" style="color:red;">图片比例：2.8:1</span>
+				{if $row->list_pic_big}<a href="{$row->list_pic_big}" target="_blank"><img src="{$row->list_pic_big}" height="34" onerror="this.src='/images/nopic.png'" /></a>{/if}
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label no-padding-right" for="pic_small">列表小图</label>
+			<div class="col-sm-10">
+				<input type="hidden" name="origin_pic_small" id="origin_pic_small" value="{$row->list_pic_small}" />
+				<div class="col-file col-xs-3"><input type="file" id="pic_small" name="pic_small" value="" /></div>
+				<span class="some-line" style="color:red;">图片比例：1.4:1</span>
+				{if $row->list_pic_small}<a href="{$row->list_pic_small}" target="_blank"><img src="{$row->list_pic_small}" height="34" onerror="this.src='/images/nopic.png'" /></a>{/if}
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label no-padding-right" for="flag_pic">国旗</label>
+			<div class="col-sm-10">
+				<input type="hidden" name="origin_flag_pic" id="origin_flag_pic" value="{$row->flag_pic}" />
+				<div class="col-file col-xs-3"><input type="file" id="flag_pic" name="flag_pic" value="" /></div>
+				{if $row->flag_pic}<a href="{$row->flag_pic}" target="_blank"><img src="{$row->flag_pic}" height="34" onerror="this.src='/images/nopic.png'" /></a>{/if}
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label no-padding-right" for="memo">备注</label>
+			<div class="col-sm-10">
+				<input type="text" id="memo" name="memo" value="{$row->memo}" class="col-xs-6" />
+			</div>
+		</div>
+		
+		<div class="form-group">
+			<label class="col-sm-2 control-label no-padding-right" for="sort">排序</label>
+			<div class="col-sm-10">
+				<input type="text" id="sort" name="sort" value="{$row->sort}" class="col-xs-6" />
+			</div>
+		</div>
+		
+		<div class="form-group">
+			<label class="col-sm-2 control-label no-padding-right" for="status">状态</label>
+			<div class="col-sm-10">
+				<div class="radio">
+					<label>
+						<input type="radio" name="status" value="1" class="ace"{if $row->status == 1 }checked{/if} />
+						<span class="lbl"> 正常 </span>
+					</label>
+				</div>
+				<div class="radio">
+					<label>
+						<input type="radio" name="status" value="0" class="ace" {if $row->status == 0 }checked{/if}/>
+						<span class="lbl"> 隐藏 </span>
+					</label>
+				</div>
+			</div>
+		</div>
+
+		<div class="clearfix form-actions">
+			<div class="col-md-offset-3 col-md-9">
+				<button class="btn btn-info" type="submit">
+					<i class="ace-icon fa fa-check bigger-110"></i>
+					提交
+				</button>
+
+				&nbsp; &nbsp; &nbsp;
+				<button class="btn" type="reset">
+					<i class="ace-icon fa fa-undo bigger-110"></i>
+					重置
+				</button>
+			</div>
+		</div>
+	</form>
+</div>
+</div>
+
+{include file="footer.html"}

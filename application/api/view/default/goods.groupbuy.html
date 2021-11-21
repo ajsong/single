@@ -1,0 +1,100 @@
+{include file="header.html"}
+<body class="gr">
+
+<div class="navBar">
+	<a class="left" href="javascript:history.back()"><i class="return"></i></a>
+	<div class="titleView-x">特价拼团</div>
+</div>
+
+<div class="goods-activity goods-groupbuy">
+	<div class="pullRefresh">
+		{if is_array($data.goods) && count($data.goods)}
+		<ul class="list">
+			{foreach from=$data.goods item=g}
+			<li>
+				<a href="/wap/?app=goods&act=detail&id={$g->id}">
+					<div class="pic" url="{$g->pic}"></div>
+					<div class="title">{$g->name}</div>
+					<div class="content">
+						<div class="groupbuy">
+							{if is_array($g->groupbuy_list)}
+							{foreach from=$g->groupbuy_list item=m}
+							<i style="{if strlen($m->avatar)}background-image:url({$m->avatar});{/if}"></i>
+							{/foreach}
+							{/if}
+							<span>已团{$g->groupbuy_count}件</span>
+						</div>
+					</div>
+					<font class="btn"><b>去拼团</b></font>
+					<span class="price"><strong>￥{number_format($g->groupbuy_price,2,'.','')}</strong><s>￥{number_format($g->market_price,2,'.','')}</s></span>
+				</a>
+			</li>
+			{/foreach}
+		</ul>
+		{else}
+		<div class="norecord">暂时没有任何商品</div>
+		{/if}
+	</div>
+</div>
+
+{include file="footer.html"}
+<script>
+var offset = $('.pullRefresh .list > li').length;
+function createHtml(g){
+	var html = '<li>\
+		<a href="/wap/?app=goods&act=detail&id='+g.id+'">\
+			<div class="pic" url="'+g.pic+'"></div>\
+			<div class="title">'+g.name+'</div>\
+			<div class="content">\
+				<div class="groupbuy">';
+					if($.isArray(g.groupbuy_list)){
+						$.each(g.groupbuy_list, function(i, m){
+							html += '<i style="'+(m.avatar.length?'background-image:url('+m.avatar+');':'')+'"></i>';
+						});
+					}
+					html += '<span>已团'+g.groupbuy_count+'件</span>\
+				</div>\
+			</div>\
+			<font class="btn"><b>去拼团</b></font>\
+			<span class="price"><strong>￥'+g.groupbuy_price.numberFormat(2)+'</strong><s>￥'+g.market_price.numberFormat(2)+'</s></span>\
+		</a>\
+	</li>';
+	offset++;
+	return html;
+}
+function setLists(){
+	$('.list a .pic').loadbackground();
+}
+$(window).resize(setLists);
+$(function(){
+	setLists();
+	$('.pullRefresh').pullRefresh({
+		header : true,
+		footer : true,
+		footerNoMoreText : '- END -',
+		refresh : function(fn){
+			var _this = this;
+			offset = 0;
+			$.getJSON('/api/?app=goods&act=groupbuy', function(json){
+				if(json.error!=0){ $.overloadError(json.msg);return }
+				var html = '';
+				if($.isArray(json.data.goods))for(var i=0; i<json.data.goods.length; i++)html += createHtml(json.data.goods[i]);
+				_this.find('.list').html(html);
+				setLists();
+				fn();
+			});
+		},
+		load : function(fn){
+			var _this = this;
+			$.getJSON('/api/?app=goods&act=groupbuy', { offset:offset }, function(json){
+				if(json.error!=0){ $.overloadError(json.msg);return }
+				var html = '';
+				if($.isArray(json.data.goods))for(var i=0; i<json.data.goods.length; i++)html += createHtml(json.data.goods[i]);
+				_this.find('.list').append(html);
+				setLists();
+				fn();
+			});
+		}
+	});
+});
+</script>

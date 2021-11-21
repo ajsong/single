@@ -1,0 +1,192 @@
+{include file="header.html"}
+<link type="text/css" href="/js/photoswipe/photoswipe.css" rel="stylesheet" />
+<link type="text/css" href="/js/photoswipe/default-skin/default-skin.css" rel="stylesheet" />
+<script type="text/javascript" src="/js/photoswipe/photoswipe.min.js"></script>
+<script type="text/javascript" src="/js/photoswipe/photoswipe-ui-default.min.js"></script>
+<body class="gr">
+
+<div class="navBar">
+	<a class="left" href="/wap/?app=groupbuy&act=index"><i class="return"></i></a>
+	<div class="titleView-x">拼团详情</div>
+</div>
+
+<div class="groupbuy-detail">
+	<div class="goods status{$data->groupbuy_status}">
+		<a href="/wap/?app=goods&act=detail&id={$data->order_goods->id}">
+			<div class="pic" style="{if strlen($data->order_goods->pic)}background-image:url({$data->order_goods->pic});{/if}"></div>
+			<div class="name">{$data->order_goods->name}</div>
+			<div class="price">￥{number_format($data->order_goods->price,2,'.','')} <s>￥{number_format($data->order_goods->market_price,2,'.','')}</s></div>
+		</a>
+	</div>
+	
+	<div class="row">
+		<div class="member">
+			<ul class="clear-after">
+				{foreach from=$data->member_list item=g}
+				<li><div style="{if strlen($g->avatar)}background-image:url({$g->avatar});{/if}"></div>{if $g->parent_id==0}<font><i>团长</i></font>{/if}</li>
+				{/foreach}
+				{section loop=$data->remain_number name=e}
+				<li><div></div></li>
+				{/section}
+			</ul>
+			<span class="status{$data->groupbuy_status}">
+				{if $data->groupbuy_status==0}
+				仅剩 <strong>{$data->order_goods->remain}</strong> 人 / <font>00:00:00</font> 后结束
+				{else if $data->groupbuy_status==-1}
+				很遗憾，拼团失败
+				{else if $data->groupbuy_status==1}
+				已有{$data->order_goods->groupbuy_number}人参团，<i>拼团成功</i>
+				{/if}
+			</span>
+			{if $data->groupbuy_status==0}
+			<input type="hidden" id="now" value="{$data->order_goods->groupbuy_now}" />
+			<input type="hidden" id="countdown" value="{$data->order_goods->groupbuy_end_time}" />
+			{/if}
+		</div>
+		<div class="tip ge-top"><div>好友参团·人满发货·人不满退款</div>拼团须知：</div>
+	</div>
+	
+	{if $data->groupbuy_status==0}
+	<div class="buttonView">
+		{if $data->owner==1}
+		<a class="btn share" href="javascript:void(0)">一键分享给好友</a>
+		{else}
+		<a class="btn join" href="javascript:void(0)">一键参团</a>
+		{/if}
+	</div>
+	{/if}
+</div>
+
+{if $data->owner==0 && $data->groupbuy_status==0}
+{if strlen($data->goods->spec)}
+<div class="goods-group goods-spec">
+	<div class="picView">
+		<div>
+			<a href="javascript:void(0)"><b>⊗</b></a>
+			{if is_array($data->goods->pics) && count($data->goods->pics)}
+			<a class="pic" href="{$data->goods->pics[0]->pic}" url="{$data->goods->pics[0]->pic}" style="background-image:url({$data->goods->pics[0]->pic});"></a>
+			{else}
+			<a class="pic" href="{$data->goods->pic}" url="{$data->goods->pic}" style="background-image:url({$data->goods->pic});"></a>
+			{/if}
+			<strong>￥{number_format($data->goods->price,2,'.','')}</strong>
+			<font>库存{$data->goods->stocks}件</font>
+			<span>选择{$data->goods->spec}分类</span>
+		</div>
+	</div>
+	<div class="specView">
+		{foreach from=$data->goods->specs item=g}
+		<div class="specGroup clear-after ge-top ge-light">
+			<div>{$g->name}</div>
+			{foreach from=$g->sub item=s}
+			<a href="javascript:void(0)" spec_id="{$s->id}"><span>{$s->name}</span></a>
+			{/foreach}
+		</div>
+		{/foreach}
+	</div>
+	<div class="btnView">
+		<a class="btn buy long" href="javascript:void(0)">确定</a>
+	</div>
+</div>
+{/if}
+
+{/if}
+
+<div class="share-mark" style="display:none;"></div>
+
+<input type="hidden" id="goods_id" value="{$data->goods->id}" />
+
+{if $data->groupbuy_status==0}
+<form action="/wap/?app=cart&act=commit" method="post">
+<input type="hidden" name="type" id="type" value="1" />
+<input type="hidden" name="parent_id" id="parent_id" value="0" />
+<input type="hidden" name="goods" id="goods" />
+</form>
+{/if}
+
+{include file="footer.html"}
+<script>
+$(function(){
+	var ul = $('.groupbuy-detail .member ul');
+	ul.css('margin-left', (($('.groupbuy-detail .member').width()-ul.width())/2)+'px');
+	
+	{if $data->groupbuy_status==0}
+	$.shareMark('.share');
+	
+	if($('#countdown').length){
+		var countdown = Number($('#countdown').val()), now = Number($('#now').val()),
+			countdownFn = function(){
+				var result = countdown - now, r = result;
+				if(result<=0){
+					$('.row .member > span font').html('00:00:00');
+					clearInterval(timer);
+					timer = null;
+					location.href = location.href;
+					return;
+				}
+				var day = Math.floor(r/(60*60*24));
+				r = result - day*60*60*24;
+				var hour = Math.floor(r/(60*60));
+				r -= hour*60*60;
+				var minute = Math.floor(r/60);
+				r -= minute*60;
+				var second = r;
+				$('.row .member > span font').html($.fillZero(hour,2)+':'+$.fillZero(minute,2)+':'+$.fillZero(second,2));
+				now += 1;
+			},
+			timer = setInterval(countdownFn, 1000);
+		countdownFn();
+	}
+	
+	$('.join').click(function(){
+		$('.goods-spec').presentView();
+	});
+	$('.buy').click(function(){
+		if(!$.checklogin())return;
+		var spec_id = [], quantity = 1;
+		if($('.specGroup').length){
+			var count = 0, groupCount = $('.specGroup').length;
+			$('.specGroup a.this').each(function(){
+				if(!!!$(this).attr('spec_id') || Number($(this).attr('spec_id'))<=0) return false;
+				spec_id.push($(this).attr('spec_id'));
+				count++;
+			});
+			if(count!=groupCount){
+				if(!$(this).parents('.goods-spec').length)$('.goods-spec').presentView();
+				return;
+			}
+		}
+		var goods = [{ goods_id:$('#goods_id').val(), quantity:quantity, spec:spec_id.join(',') }];
+		$('#goods').val($.jsonString(goods));
+		$('form').submit();
+	});
+	
+	$('.specGroup a').click(function(){
+		$(this).addClass('this').siblings('a').removeClass('this');
+		var spec_id = [], spec_name = [], count = 0, groupCount = $('.specGroup').length;
+		$('.specGroup a.this').each(function(){
+			if(!!!$(this).attr('spec_id') || Number($(this).attr('spec_id'))<=0)return false;
+			spec_id.push($(this).attr('spec_id'));
+			spec_name.push($(this).text());
+			count++;
+		});
+		if(count!=groupCount)return;
+		$.getJSON('/api/?app=goods&act=get_spec', { goods_id:$('#goods_id').val(), spec:spec_id.join(',') }, function(json){
+			if(json.error!=0){ $.overloadError(json.msg);return }
+			if(!$.isPlainObject(json.data))return;
+			if(json.data.pic.length)$('.picView .pic').attr('url', json.data.pic).css('background-image', 'url('+json.data.pic+')').photoBrowser();
+			$('.picView strong').html('￥'+json.data.price.numberFormat(2));
+			$('.picView font').html('库存'+json.data.stocks+'件');
+			$('.picView span').html('已选 "'+spec_name.join('" "')+'"');
+			$('.spec-param span').addClass('selected').html('已选 "'+spec_name.join('" "')+'"');
+		});
+	});
+	$('.specGroup').each(function(){
+		if($(this).find('a').length==1)$(this).find('a').click();
+	});
+	$('.picView a:eq(0)').click(function(){
+		$('.goods-spec').presentView(false);
+	});
+	if($('.picView .pic').length)$('.picView .pic').photoBrowser();
+	{/if}
+});
+</script>

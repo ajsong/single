@@ -1,0 +1,72 @@
+{include file="header.html"}
+
+<div class="page-header">
+	<h6>
+		统计报表
+		<small>
+			<i class="ace-icon fa fa-angle-double-right"></i>
+			会员统计
+		</small>
+
+	</h6>
+</div>
+
+<form class="form-inline" action="?" method="get">
+<input type="hidden" name="app" id="app" value="{$app}" />
+<input type="hidden" name="act" id="act" value="{$act}" />
+<input type="text" name="begin_time" id="begin_time" value="{$begin_time}" placeholder="开始时间" @="#end_time" />
+<input type="text" name="end_time" id="end_time" value="{$end_time}" placeholder="结束时间" />
+<button type="submit" class="btn btn-info btn-sm">
+	<i class="ace-icon fa fa-search bigger-110"></i>搜索
+</button>
+</form>
+
+<div id="container" style="min-width:310px; height:400px; margin:0 auto;"></div>
+
+{include file="footer.html"}
+<script src="/js/highcharts/js/highcharts.js"></script>
+<script src="/js/highcharts/js/modules/exporting.js"></script>
+<script>
+$(function(){
+	$('#begin_time').datepicker({
+		just:'month',
+		format:'yyyy-m'
+	});
+    $('#container').highcharts({
+        title: {
+            text: '注册人数',
+            x: -20
+        },
+        subtitle: {
+            text: '',
+            x: -20
+        },
+        xAxis: {
+            categories: [{$xaxis}]
+        },
+        yAxis: {
+            title: {
+                text: '人数'
+            },
+            plotLines: [{
+                value: 0,
+                width: 1,
+                color: '#808080'
+            }]
+        },
+        tooltip: {
+            valueSuffix: '人'
+        },
+        legend: {
+            layout: 'vertical',
+            align: 'right',
+            verticalAlign: 'middle',
+            borderWidth: 0
+        },
+        series: [{
+            name: '注册人数',
+            data: [{$rs}]
+        }]
+    });
+});
+</script>

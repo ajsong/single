@@ -1,0 +1,29 @@
+{include file="header.html"}
+<body class="gr">
+
+<div class="navBar">
+	<a class="left" href="javascript:history.back()"><i class="return"></i></a>
+	<div class="titleView-x">消息中心</div>
+</div>
+
+<div class="msg-index width-wrap">
+	{if $member->id==0}
+	<a href="/wap/?tpl=register" class="register"><div>完成注册，享受更多优惠</div><div class="btn">立即注册</div></a>
+	<ul class="msg-list">
+		<li><a href="/wap/?app=article&act=detail&id=16"><i class="ico1"></i><div><span>联系客服</span><font>解决各类产品售前售后疑问</font></div></a></li>
+		<li><a href="/wap/?app=article&act=detail&id=12"><i class="ico8"></i><div><span>新人教程</span><font>帮助第一次使用者指导性操作</font></div></a></li>
+	</ul>
+	{else}
+	<ul class="msg-list">
+		<li><a href="/wap/?app=article&act=detail&id=16"><i class="ico1"></i><div><span>联系客服</span><font>解决各类产品售前售后疑问</font></div></a></li>
+		<li><a href="/wap/?app=member&act=edit"><i class="ico2"></i><div><span>完善资料</span><font>完善个人资料累计积分兑换大礼</font></div></a></li>
+		<li><a href="/wap/?app=article&act=detail&id=12"><i class="ico3"></i><div><span>新人优惠券</span><font>新注册用户获得新人专享优惠劵</font></div></a></li>
+		<li><a href="/wap/?app=message&act=index&type=offer"><i class="ico4"></i><div><span>优惠信息</span><font>商家优惠活动信息</font></div></a></li>
+		<li><a href="/wap/?app=message&act=index&type=logistics"><i class="ico5"></i><div><span>物流通知</span><font>此处可以查看您的订单物流通知</font></div></a></li>
+		<!--<li><a href="#"><i class="ico6"></i><div><span>您有发现消息</span><font>发现中发的文章，有留言或者关注收藏</font></div></a></li>-->
+		<li><a href="/wap/?app=article&act=detail&id=13"><i class="ico7"></i><div><span>我的攻略</span><font>各种营销活动玩法的解释</font></div></a></li>
+	</ul>
+	{/if}
+</div>
+
+{include file="footer.html"}

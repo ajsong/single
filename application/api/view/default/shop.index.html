@@ -1,0 +1,110 @@
+{include file="header.html"}
+<body class="gr">
+
+<div class="navBar">
+	<a class="left" href="/wap/"><i class="return"></i></a>
+	<div class="titleView-x">体验店</div>
+</div>
+
+<div class="shop-index">
+	<div class="pullRefresh">
+		<ul class="list">
+			{foreach from=$data name=g item=g}
+			<li>
+				<a href="/wap/?app=shop&act=detail&id={$g->id}">
+					<div class="pic" style="background-image:url({$g->poster_pic});"></div>
+					<div class="view">
+						<b class="ge-left"></b>
+						<div>{$g->name}</div>
+						<div>
+							<ul>
+								<li>
+									<span class="address" province="{$g->province}" city="{$g->city}" district="{$g->district}" address="{$g->address}"></span>
+								</li>
+								<li>
+									{if $g->wifi==1}<span>免费WIFI</span>{/if}
+									{if $g->pickup==1}<span>门店取货</span>{/if}
+									{if $g->app_discount>0}<span>APP下单{number_format($g->app_discount,1,'.','')}折</span>{/if}
+								</li>
+							</ul>
+						</div>
+					</div>
+				</a>
+			</li>
+			{/foreach}
+		</ul>
+	</div>
+</div>
+
+{include file="footer.html"}
+<script type="text/javascript" src="js/city.js"></script>
+<script>
+var offset = $('.pullRefresh .list > li').length;
+function createHtml(g){
+	var html = '<li>\
+		<a href="/wap/?app=shop&act=detail&id='+g.id+'">\
+			<div class="pic" style="background-image:url('+g.poster_pic+');"></div>\
+			<div class="view">\
+				<b class="ge-left"></b>\
+				<div>'+g.name+'</div>\
+				<div>\
+					<ul>\
+						<li>\
+							<span class="address" province="'+g.province+'" city="'+g.city+'" district="'+g.district+'" address="'+g.address+'"></span>\
+						</li>\
+						<li>';
+							if(g.wifi==1)html += '<span>免费WIFI</span>';
+							if(g.pickup==1)html += '<span>门店取货</span>';
+							if(g.app_discount>0)html += '<span>APP下单'+g.app_discount.numberFormat(1)+'折</span>';
+						html += '</li>\
+					</ul>\
+				</div>\
+			</div>\
+		</a>\
+	</li>';
+	offset++;
+	return html;
+}
+function changeCityCode(){
+	$('tt').each(function(){
+		var html = $(this).html();
+		if(isNaN(html))return true;
+		$(this).html(getCityName(html).replace(/市/g, ''));
+	});
+	$('span.address').each(function(){
+		var _this = $(this), province = _this.attr('province'), city = _this.attr('city'), district = _this.attr('district'), address = _this.attr('address');
+		_this.html(comboCity(province, city, district, address));
+	});
+}
+$(function(){
+	changeCityCode();
+	$('.pullRefresh').pullRefresh({
+		header : true,
+		footer : true,
+		footerNoMoreText : '- END -',
+		refresh : function(fn){
+			var _this = this;
+			offset = 0;
+			$.getJSON('/api/?app=shop&act=index', function(json){
+				if(json.error!=0){ $.overloadError(json.msg);return }
+				var html = '';
+				if($.isArray(json.data))for(var i=0; i<json.data.length; i++)html += createHtml(json.data[i]);
+				_this.find('.list').html(html);
+				changeCityCode();
+				fn();
+			});
+		},
+		load : function(fn){
+			var _this = this;
+			$.getJSON('/api/?app=shop&act=index', { offset:offset }, function(json){
+				if(json.error!=0){ $.overloadError(json.msg);return }
+				var html = '';
+				if($.isArray(json.data))for(var i=0; i<json.data.length; i++)html += createHtml(json.data[i]);
+				_this.find('.list').append(html);
+				changeCityCode();
+				fn();
+			});
+		}
+	});
+});
+</script>

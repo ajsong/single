@@ -1,0 +1,43 @@
+{include file="header.html"}
+
+<div class="page-header">
+	<h6>
+		微信管理
+		<small>
+			<i class="ace-icon fa fa-angle-double-right"></i>
+			模板消息
+		</small>
+		<div>
+			<a href="?app=wechat&act=template_edit">导入模板消息列表</a>
+		</div>
+	</h6>
+</div>
+
+<div class="table-content">
+<table id="simple-table" class="table table-striped table-bordered table-hover">
+	<thead>
+		<tr>
+			<th width="100">类型ID</th>
+			<th>模板名称</th>
+			<th>模板ID</th>
+		</tr>
+	</thead>
+
+	<tbody>
+		{foreach from=$rs item=row}
+		<tr>
+			<td>{$row->type_id}</td>
+			<td>{$row->name}</td>
+			<td>{$row->template_id}</td>
+		</tr>
+		{foreachelse}
+		<tr bgcolor="white"><td colspan="13" height="50">暂无记录</td></tr>
+		{/foreach}
+
+	</tbody>
+</table>
+</div>
+<div class="mypage">
+
+</div>
+{include file="footer.html"}

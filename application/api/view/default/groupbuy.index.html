@@ -1,0 +1,131 @@
+{include file="header.html"}
+<body class="gr">
+
+<div class="navBar">
+	<a class="left" href="/wap/?app=member&act=index"><i class="return"></i></a>
+	<div class="titleView-x">我的团购</div>
+</div>
+
+<div class="order-index groupbuy-index">
+	<div class="pullRefresh">
+		<header class="ge-bottom ge-light">
+			<ul class="switchView">
+				<li {if !isset($status)}class="this"{/if}><a href="/wap/?app=groupbuy&act=index">全部</a></li>
+				<li {if isset($status) && $status=='0'}class="this"{/if}><a href="/wap/?app=groupbuy&act=index&status=0">等待成团</a></li>
+				<li {if isset($status) && $status==1}class="this"{/if}><a href="/wap/?app=groupbuy&act=index&status=1">拼团成功</a></li>
+				<li {if isset($status) && $status==-1}class="this"{/if}><a href="/wap/?app=groupbuy&act=index&status=-1">拼团失败</a></li>
+			</ul>
+		</header>
+		
+		{if count($data)>0}
+		<ul class="list tableView tableView-noLine">
+			{foreach from=$data item=g}
+			<li>
+				<div class="view">
+					<a href="?app=groupbuy&act=detail&id={$g->id}&order_sn={$g->order_sn}">
+						<div class="status ge-bottom ge-light status{$g->status}"><div>{$g->status_name}</div></div>
+						<ul>
+							{foreach from=$g->goods item=p}
+							<li>
+								<div class="gview">
+									<div class="pic" url="{$p->goods_pic}"></div>
+									<div class="name">{$p->goods_name}</div>
+									<div class="price"><span>×{$p->quantity}</span><div>￥{number_format($p->price,2,'.','')}</div></div>
+								</div>
+							</li>
+							{/foreach}
+						</ul>
+					</a>
+					<div class="total" mid="{$g->id}">
+						{if $g->status==0}
+						<a class="invite" href="javascript:void(0)"><span>邀请参加</span></a>
+						{else if $g->status==1 || $g->status==-1}
+						<a class="order-detail" href="?app=order&act=detail&order_sn={$g->order_sn}&for_pay=1"><span>订单详情</span></a>
+						{/if}
+						<a class="group-detail" href="?app=groupbuy&act=detail&id={$g->id}&order_sn={$g->order_sn}"><span>拼团详情</span></a>
+					</div>
+				</div>
+			</li>
+			{/foreach}
+		</ul>
+		{else}
+		<div class="norecord">当前没有任何拼团</div>
+		{/if}
+	</div>
+</div>
+
+<div class="share-mark" style="display:none;"></div>
+
+{include file="footer.html"}
+<script>
+var offset = $('.pullRefresh .list > li').length;
+function createHtml(g){
+	var html = '<li>\
+		<div class="view">\
+			<a href="?app=groupbuy&act=detail&id='+g.id+'&order_sn='+g.order_sn+'">\
+				<div class="status ge-bottom ge-light status'+g.status+'"><div>'+g.status_name+'</div></div>\
+				<ul>';
+				for(var i=0; i<g.goods.length; i++){
+				html += '<li>\
+						<div class="gview">\
+							<div class="pic" url="'+g.goods[i].goods_pic+'"></div>\
+							<div class="name">'+g.goods[i].goods_name+'</div>\
+							<div class="price"><span>×'+g.goods[i].quantity+'</span><div>￥'+g.goods[i].price.numberFormat(2)+'</div></div>\
+						</div>\
+					</li>';
+				}
+				html += '</ul>\
+			</a>\
+			<div class="total" mid="'+g.id+'">';
+				if(g.status==0){
+					html += '<a class="invite" href="javascript:void(0)"><span>邀请参加</span></a>';
+				}else if(g.status==1 || g.status==-1){
+					html += '<a class="order-detail" href="?app=order&act=detail&order_sn='+g.order_sn+'&for_pay=1"><span>订单详情</span></a>';
+				}
+				html += '<a class="group-detail" href="?app=groupbuy&act=detail&id='+g.id+'&order_sn='+g.order_sn+'"><span>拼团详情</span></a>\
+			</div>\
+		</div>\
+	</li>';
+	offset++;
+	return html;
+}
+function setInfo(){
+	if($('.gview .pic').length)$('.gview .pic').loadbackground();
+	$('.tableView .total strong').priceFont('bigPrice');
+	$('.gview .price div').priceFont('bigPrice');
+}
+$(function(){
+	setInfo();
+	$('.switchView').switchView({ column:'column', index:$('.switchView .this').index() });
+	$('body').on('click', '.invite', function(){ $.shareMark() });
+	$('.share-mark').click(function(){ $('.share-mark').fadeOut(300) });
+	$('.pullRefresh').pullRefresh({
+		header : true,
+		footer : true,
+		footerNoMoreText : '- END -',
+		refresh : function(fn){
+			var _this = this;
+			offset = 0;
+			$.getJSON('/api/?app=groupbuy&act=index{if isset($status)}&status={$status}{/if}', function(json){
+				if(json.error!=0){ $.overloadError(json.msg);return }
+				var html = '';
+				if($.isArray(json.data))for(var i=0; i<json.data.length; i++)html += createHtml(json.data[i]);
+				_this.find('.tableView').html(html);
+				setInfo();
+				fn();
+			});
+		},
+		load : function(fn){
+			var _this = this;
+			$.getJSON('/api/?app=groupbuy&act=index{if isset($status)}&status={$status}{/if}', { offset:offset }, function(json){
+				if(json.error!=0){ $.overloadError(json.msg);return }
+				var html = '';
+				if($.isArray(json.data))for(var i=0; i<json.data.length; i++)html += createHtml(json.data[i]);
+				_this.find('.tableView').append(html);
+				setInfo();
+				fn();
+			});
+		}
+	});
+});
+</script>

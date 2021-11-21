@@ -1,0 +1,318 @@
+{include file="header.html"}
+<div class="page-header">
+	<h6>
+		商品列表
+		<small>
+			<i class="ace-icon fa fa-angle-double-right"></i>
+			商品列表
+		</small>
+		<div>
+			<a href="javascript:void(0)" mark="price" class="dialog">批量改价格</a>
+			<!--<a href="javascript:void(0)" mark="integral" class="dialog">批量改购买积分</a>-->
+			<a href="javascript:void(0)" mark="ext_property" class="dialog">批量改属性</a>
+			<a href="javascript:void(0)" mark="cate" class="dialog">批量改分类</a>
+			<!--<a href="javascript:void(0)" mark="brand" class="dialog" skip="check">批量改品牌</a>-->
+			<a href="?app=goods&act=qrcode_out&id={$id}&keyword={$keyword}&shop_id={$shop_id}" target="_blank">导出二维码</a>
+			<a href="?app=goods&act=add" class="iframe-layer">添加商品</a>
+		</div>
+	</h6>
+</div>
+
+<form class="form-inline" action="?" method="get">
+<input type="hidden" name="app" id="app" value="{$app}" />
+<input type="hidden" name="act" id="act" value="{$act}" />
+<input type="text" name="id" id="id" value="{$id}" placeholder="ID" />
+<input type="text" name="keyword" id="keyword" value="{$keyword}" placeholder="关键词" />
+<div class="some-block">
+	<div class="checkbox"><label><input type="checkbox" name="ext_property[]" id="ext_property1" value="1" class="ace" {if is_array($ext_property) && in_array(1,$ext_property)}checked{/if} /><span class="lbl">推荐</span></label></div>
+	<div class="checkbox"><label><input type="checkbox" name="ext_property[]" id="ext_property2" value="2" class="ace" {if is_array($ext_property) && in_array(2,$ext_property)}checked{/if} /><span class="lbl">热销</span></label></div>
+	<div class="checkbox"><label><input type="checkbox" name="ext_property[]" id="ext_property3" value="3" class="ace" {if is_array($ext_property) && in_array(3,$ext_property)}checked{/if} /><span class="lbl">精品</span></label></div>
+	<div class="checkbox"><label><input type="checkbox" name="ext_property[]" id="ext_property4" value="4" class="ace" {if is_array($ext_property) && in_array(4,$ext_property)}checked{/if} /><span class="lbl">新品</span></label></div>
+	<div class="checkbox"><label><input type="checkbox" name="ext_property[]" id="ext_property5" value="5" class="ace" {if is_array($ext_property) && in_array(5,$ext_property)}checked{/if} /><span class="lbl">折扣</span></label></div>
+	{if $edition>2}<div class="checkbox"><label><input type="checkbox" name="purchase" id="purchase" value="1" class="ace" {if $purchase=='1'}checked{/if} /><span class="lbl">秒杀商品</span></label></div>{/if}
+</div>
+<div class="clear"></div>
+<input type="text" name="startprice" id="startprice" value="{$startprice}" placeholder="￥" class="some-width60" />
+<span class="some-span">-</span>
+<input type="text" name="endprice" id="endprice" value="{$endprice}" placeholder="￥" class="some-width60" />
+{if is_array($shops)}
+<select name="shop_id" id="shop_id" class="form-control">
+	<option value="">门店</option>
+	{foreach from=$shops item=g}
+	<option value="{$g->id}" {if $g->id==$shop_id}selected{/if}>{$g->name}</option>
+	{/foreach}
+</select>
+{/if}
+{if in_array('category',$function)}
+<select name="category_id" id="category_id" class="form-control">
+	<option value="">分类</option>
+	{$categories}
+</select>
+{/if}
+{if is_array($brand)}
+<select name="brand_id" id="brand_id" class="form-control">
+	<option value="">品牌</option>
+	{foreach from=$brand item=g}
+	<option value="{$g->id}" {if $g->id==$brand_id}selected{/if}>{$g->name}</option>
+	{/foreach}
+</select>
+{/if}
+<select name="status" id="status" class="form-control">
+	<option value="">状态</option>
+	<option value="1" {if $status=="1"}selected{/if}>正常</option>
+	{if $edition>2}<option value="-1" {if $status=="-1"}selected{/if}>自定上架时间</option>{/if}
+	<option value="0" {if $status=="0"}selected{/if}>下架</option>
+</select>
+<button type="submit" class="btn btn-info btn-sm">
+	<i class="ace-icon fa fa-search bigger-110"></i>搜索
+</button>
+</form>
+
+<form action="?app=goods&act=check_cate" method="post" id="tochange">
+<input type="hidden" name="cate_type" id="cate_type" />
+<div class="table-content">
+<table id="simple-table" class="table table-striped table-bordered table-hover">
+	<thead>
+		<tr>
+			<th width="50"><input type="checkbox" data-type="ace" data-seleteAll=".checkbox" class="checkboxes" title="全选" /></th>
+			<th>ID</th>
+			<th>图片</th>
+			<th>名称</th>
+			<th>二维码</th>
+			<th>价格</th>
+			{if $edition>2}<th>促销价</th>{/if}
+			{if $edition>1}<th>库存</th>{/if}
+			{if in_array('category',$function)}<th>分类</th>{/if}
+			{if is_array($shops)}<th>店铺</th>{/if}
+			{if is_array($brand)}<th>品牌</th>{/if}
+			<th>推荐</th>
+			<th>热销</th>
+			<th>精品</th>
+			<th>新品</th>
+			<th>折扣</th>
+			<th>状态</th>
+			<th>添加时间</th>
+			<th>操作</th>
+		</tr>
+	</thead>
+	<tbody>
+		{foreach from=$rs item=row name=row}
+		<tr>
+			<td><input type="checkbox" data-type="ace" name="checkbox[]" class="checkbox" id="{$row->id}" value="{$row->id}" /></td>
+			<td>{$row->id}</td>
+			<td><img src="{$row->pic}" height="100" onerror="this.src='/images/nopic.png'" /></td>
+			<td><a href="?app=goods&act=edit&id={$row->id}" class="iframe-layer">{$row->name|truncate:20}</a></td>
+			<td><img src="/api/?app=other&act=qrcode&data={$row->url}" height="100" onerror="this.src='/images/nopic.png'" /></td>
+			<td>{$row->price}</td>
+			{if $edition>2}<td>{$row->promote_price}</td>{/if}
+			{if $edition>1}<td>{$row->stocks}</td>{/if}
+			{if in_array('category',$function)}<td>{$row->category_name}</td>{/if}
+			{if is_array($shops)}<td>{$row->shop_name}</td>{/if}
+			{if is_array($brand)}<td>{$row->brand_name}</td>{/if}
+			<td>
+				<label class="coo-checkbox-app">
+					<input type="checkbox" coo-change="ajaxPost" data-url="{$GM_PATH}api/goods/change_ext_property" data-data='{ "id":{$row->id} }' data-name="ext_property" value="1" {if strpos(','|cat:$row->ext_property|cat:',', ',1,')!==false}checked{/if} />
+					<div><span></span></div>
+				</label>
+			</td>
+			<td>
+				<label class="coo-checkbox-app">
+					<input type="checkbox" coo-change="ajaxPost" data-url="{$GM_PATH}api/goods/change_ext_property" data-data='{ "id":{$row->id} }' data-name="ext_property" value="2" {if strpos(','|cat:$row->ext_property|cat:',', ',2,')!==false}checked{/if} />
+					<div><span></span></div>
+				</label>
+			</td>
+			<td>
+				<label class="coo-checkbox-app">
+					<input type="checkbox" coo-change="ajaxPost" data-url="{$GM_PATH}api/goods/change_ext_property" data-data='{ "id":{$row->id} }' data-name="ext_property" value="3" {if strpos(','|cat:$row->ext_property|cat:',', ',3,')!==false}checked{/if} />
+					<div><span></span></div>
+				</label>
+			</td>
+			<td>
+				<label class="coo-checkbox-app">
+					<input type="checkbox" coo-change="ajaxPost" data-url="{$GM_PATH}api/goods/change_ext_property" data-data='{ "id":{$row->id} }' data-name="ext_property" value="4" {if strpos(','|cat:$row->ext_property|cat:',', ',4,')!==false}checked{/if} />
+					<div><span></span></div>
+				</label>
+			</td>
+			<td>
+				<label class="coo-checkbox-app">
+					<input type="checkbox" coo-change="ajaxPost" data-url="{$GM_PATH}api/goods/change_ext_property" data-data='{ "id":{$row->id} }' data-name="ext_property" value="5" {if strpos(','|cat:$row->ext_property|cat:',', ',5,')!==false}checked{/if} />
+					<div><span></span></div>
+				</label>
+			</td>
+			<td>{if $row->status==1}<font class="fa fa-check"></font>{else}<font class="fa fa-close"></font>{/if}</td>
+			<td>{date('Y-m-d H:i:s', $row->add_time)}</td>
+			<td>
+				<a href="?app=goods&act=edit&id={$row->id}" class="iframe-layer">
+					<span class="btn btn-xs btn-info">
+					<i class="ace-icon fa fa-pencil bigger-120"></i>
+				</span>
+				</a>
+				<a href="?app=goods&act=delete&id={$row->id}" class="delete">
+					<span class="btn btn-xs btn-danger">
+					<i class="ace-icon far fa-trash-alt bigger-120"></i>
+				</span>
+				</a>
+			</td>
+		</tr>
+		{foreachelse}
+		<tr bgcolor="white"><td colspan="13" height="50">暂无记录</td></tr>
+		{/foreach}
+	</tbody>
+</table>
+</div>
+
+<!-- 弹出 -->
+<div class="modal fade" id="to-price" role="dialog" aria-labelledby="gridSystemModalLabel">
+	<div class="modal-dialog row" role="document" style="margin-top:8%;">
+		<div class="modal-content col-lg-offset-2">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+			</div>
+			<div class="modal-body">
+				<div class="container-fluid">
+					请填写价格
+					<label class="coo-radio"><input type="radio" name="price_type" id="price_type1" class="price_type" value="0" checked /><i></i></label><label for="price_type1">值</label>　
+					<label class="coo-radio"><input type="radio" name="price_type" id="price_type2" class="price_type" value="1" /><i></i></label><label for="price_type2">百分比</label><br />
+					<input type="text" name="price" /><span>元</span>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn" data-dismiss="modal"> 取消 </button>
+				<button type="button" class="btn get-to"> 提交 </button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="modal fade" id="to-integral" role="dialog" aria-labelledby="gridSystemModalLabel">
+	<div class="modal-dialog row" role="document" style="margin-top:8%;">
+		<div class="modal-content col-lg-offset-2">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+			</div>
+			<div class="modal-body">
+				<div class="container-fluid">
+					请填写购买积分
+					<label class="coo-radio"><input type="radio" name="integral_type" id="integral_type1" class="integral_type" value="0" checked /><i></i></label><label for="integral_type1">值</label>　
+					<label class="coo-radio"><input type="radio" name="integral_type" id="integral_type2" class="integral_type" value="1" /><i></i></label><label for="integral_type2">百分比</label><br />
+					<input type="text" name="integral" /><span>积分</span>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn" data-dismiss="modal"> 取消 </button>
+				<button type="button" class="btn get-to"> 提交 </button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="modal fade" id="to-ext_property" role="dialog" aria-labelledby="gridSystemModalLabel">
+	<div class="modal-dialog row" role="document" style="margin-top:8%;">
+		<div class="modal-content col-lg-offset-2">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+			</div>
+			<div class="modal-body">
+				<div class="container-fluid">
+					请选择属性<br />
+					<label class="coo-checkbox"><input type="checkbox" name="ext_property[]" id="property2" value="2" /><i><i></i></i></label><label for="property2">热销</label>　
+					<label class="coo-checkbox"><input type="checkbox" name="ext_property[]" id="property5" value="5" /><i><i></i></i></label><label for="property5">折扣</label>　
+					<label class="coo-checkbox"><input type="checkbox" name="ext_property[]" id="property1" value="1" /><i><i></i></i></label><label for="property1">推荐</label>　
+					<label class="coo-checkbox"><input type="checkbox" name="ext_property[]" id="property4" value="4" /><i><i></i></i></label><label for="property4">新品</label>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn" data-dismiss="modal"> 取消 </button>
+				<button type="button" class="btn get-to"> 提交 </button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="modal fade" id="to-cate" role="dialog" aria-labelledby="gridSystemModalLabel">
+	<div class="modal-dialog row" role="document" style="margin-top:8%;">
+		<div class="modal-content col-lg-offset-2">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+			</div>
+			<div class="modal-body">
+				<div class="container-fluid">
+					请选择分类
+					<select name="catechange" id="cate" class="form-control" search="true" height="26" style="width:160px;">
+						<option value=""></option>
+						{$categories}
+					</select>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn" data-dismiss="modal"> 取消 </button>
+				<button type="button" class="btn get-to"> 提交 </button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="modal fade" id="to-brand" role="dialog" aria-labelledby="gridSystemModalLabel">
+	<div class="modal-dialog row" role="document" style="margin-top:8%;">
+		<div class="modal-content col-lg-offset-2">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+			</div>
+			<div class="modal-body">
+				<div class="container-fluid">
+					请选择品牌
+					<select name="brandchange" id="brand" class="form-control"  data-live-search="true" style="line-heght:30px;display:inline-block;width:160px;">
+						<option value=""></option>
+						{foreach from=$brand item=row}
+						<option value="{$row->id}">{$row->name}</option>
+						{/foreach}
+					</select>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn" data-dismiss="modal"> 取消 </button>
+				<button type="button" class="btn get-to"> 提交 </button>
+			</div>
+		</div>
+	</div>
+</div>
+</form>
+
+<div class="mypage">
+	共 {$sharepage.num_records} 个记录  {$sharepage.current_page} / {$sharepage.num_pages} 页  {$sharepage.first_page} {$sharepage.prev} {$sharepage.nav} {$sharepage.next} {$sharepage.last_page}
+</div>
+
+{include file="footer.html"}
+<script>
+$(function(){
+	$('#cate').selectpicker({ isPicker:false });
+	$('#brand').selectpicker({ isPicker:false });
+	$('.table .checkboxes').change(function(){
+		$('.table .checkbox:checkbox').checked(this.checked);
+	});
+	$('.page-header .dialog').click(function(){
+		if(!!!$(this).attr('skip') && !$('.checkbox:checked').length){ alert('请选择需要修改的记录');return }
+		var mark = $(this).attr('mark');
+		$('#cate_type').val(mark);
+		$('#to-'+mark).modal();
+	});
+	$('.price_type').change(function(){
+		var span = $(this).parent().parent().find('span');
+		if(Number($(this).val())==0)span.html('元');
+		else span.html('%');
+	});
+	$('.integral_type').change(function(){
+		var span = $(this).parent().parent().find('span');
+		if(Number($(this).val())==0)span.html('积分');
+		else span.html('%');
+	});
+    $('.get-to').click(function(){
+		var model = $(this).parents('.modal').eq(0), id = model.attr('id');
+		switch(id){
+			case 'to-price':
+				break;
+		}
+        $('#tochange').submit();
+    });
+});
+</script>

@@ -1,0 +1,33 @@
+{include file="header.html"}
+<body class="gr">
+
+<div class="navBar">
+	<a class="left" href="javascript:history.back()"><i class="return"></i></a>
+	<div class="titleView-x">意见反馈</div>
+	<a class="right" href="javascript:void(0)"><span>提交</span></a>
+</div>
+
+<div class="feedback">
+	<form action="/api/?app=other&act=feedback" method="post">
+	<input type="hidden" name="goalert" value="非常感谢您的反馈" />
+	<input type="hidden" name="gourl" value="/wap/?app=member&act=index" />
+	<ul class="tableView tableView-noMargin tableView-light">
+		<li><h1><input type="text" name="name" id="name" placeholder="请输入用户昵称" /></h1></li>
+		<li><h1><input type="tel" name="mobile" id="mobile" placeholder="请输入手机号码" /></h1></li>
+		<li><h1><textarea name="content" id="content" placeholder="请输入你的反馈信息"></textarea></h1></li>
+	</ul>
+	</form>
+</div>
+
+{include file="footer.html"}
+<script>
+$(function(){
+	$('.navBar .right').click(function(){
+		if(!$('#content').val().length){
+			$.overloadError('请输入内容');
+			return false;
+		}
+		$('form').submit();
+	});
+});
+</script>

@@ -1,0 +1,73 @@
+{include file="header.html"}
+<body class="gr">
+
+<div class="navBar">
+	<a class="left" href="javascript:history.back()"><i class="return"></i></a>
+	<div class="titleView-x">商品评价</div>
+</div>
+
+<div class="comment-index">
+	<div class="pullRefresh">
+		<ul class="list">
+			{foreach from=$data name=g item=g}
+			<li class="ge-bottom">
+				<div class="info">
+					<div class="time">{$g->comment_time}</div>
+					<div class="avatar" {if $g->member_avatar!=''}style="background-image:url({$g->member_avatar});"{/if}></div>
+					<div class="name">{$g->member_name}</div>
+					<div class="star">{section loop=$g->comment_stars name=e}<i></i>{/section}</div>
+				</div>
+				<div class="content">{$g->comment_content}</div>
+			</li>
+			{/foreach}
+		</ul>
+	</div>
+</div>
+
+{include file="footer.html"}
+<script>
+var offset = $('.pullRefresh .list > li').length;
+function createHtml(g){
+	var html = '<li class="ge-bottom">\
+		<div class="info">\
+			<div class="time">'+g.comment_time+'</div>\
+			<div class="avatar" '+(g.member_avatar!=''?'style="background-image:url('+g.member_avatar+');"':'')+'></div>\
+			<div class="name">'+g.member_name+'</div>\
+			<div class="star">';
+			for(var i=0; i<g.comment_stars.length; i++)html += '<i></i>';
+			html += '</div>\
+		</div>\
+		<div class="content">'+g.comment_content+'</div>\
+	</li>';
+	offset++;
+	return html;
+}
+$(function(){
+	$('.pullRefresh').pullRefresh({
+		header : true,
+		footer : true,
+		footerNoMoreText : '- END -',
+		refresh : function(fn){
+			var _this = this;
+			offset = 0;
+			$.getJSON('/api/?app=comment&act=index&goods_id={$goods_id}&pagesize=10', function(json){
+				if(json.error!=0){ $.overloadError(json.msg);return }
+				var html = '';
+				if($.isArray(json.data))for(var i=0; i<json.data.length; i++)html += createHtml(json.data[i]);
+				_this.find('.list').html(html);
+				fn();
+			});
+		},
+		load : function(fn){
+			var _this = this;
+			$.getJSON('/api/?app=comment&act=index&goods_id={$goods_id}&pagesize=10', { offset:offset }, function(json){
+				if(json.error!=0){ $.overloadError(json.msg);return }
+				var html = '';
+				if($.isArray(json.data))for(var i=0; i<json.data.length; i++)html += createHtml(json.data[i]);
+				_this.find('.list').append(html);
+				fn();
+			});
+		}
+	});
+});
+</script>

@@ -1,0 +1,33 @@
+{include file="header.html"}
+<body class="gr">
+
+<div class="navBar">
+	<a class="left" href="/wap/?app=member&act=index"><i class="return"></i></a>
+	<div class="titleView-x">我的余额</div>
+</div>
+
+<div class="member-money">
+	<ul class="groupView">
+		<li class="topView">
+			<a href="javascript:void(0)">
+				<div>账户余额</div>
+				<span>￥{$data}</span>
+			</a>
+		</li>
+		{if in_array('recharge',$function)}
+		<li class="ge-bottom ge-light">
+			<a href="/wap/?app=recharge&act=index" class="push-ico">余额充值</a>
+		</li>
+		{/if}
+		<li>
+			<a href="/wap/?app=member&act=money_history" class="push-ico">余额明细</a>
+		</li>
+	</ul>
+</div>
+
+{include file="footer.html"}
+<script>
+$(function(){
+	$('.topView span').priceFont('bigPrice');
+});
+</script>

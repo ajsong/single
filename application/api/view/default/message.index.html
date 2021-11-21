@@ -1,0 +1,114 @@
+{include file="header.html"}
+<body class="gr">
+
+<div class="navBar">
+	<a class="left" href="javascript:history.back()"><i class="return"></i></a>
+	<div class="titleView-x">
+		{if isset($type) && $type=='offer'}优惠信息
+		{elseif isset($type) && $type=='logistics'}物流通知
+		{else}我的消息{/if}
+	</div>
+</div>
+
+<div class="message-index">
+	<div class="pullRefresh">
+		<ul class="tableView tableView-noMargin list">
+			{if count($data)>0}
+			{foreach from=$data name=g item=g}
+			<li>
+				<h1>
+					<a href="javascript:void(0)" mid="{$g->id}">
+						<div class="view {if $g->readed==1}d{/if}">
+							<div>
+								<i></i>
+								{$g->content}
+								<span class="scale10-right">{$g->add_time}</span>
+							</div>
+						</div>
+					</a>
+				</h1>
+			</li>
+			{/foreach}
+			{/if}
+		</ul>
+	</div>
+</div>
+
+{include file="footer.html"}
+<script>
+var offset = $('.pullRefresh .list > li').length;
+function createHtml(g){
+	var html = '<li>\
+		<h1>\
+			<a href="javascript:void(0)" mid="'+g.id+'">\
+				<div class="view '+(g.readed==1?'d':'')+'">\
+					<div>\
+						<i></i>\
+						'+g.content+'\
+						<span class="scale10-right">'+g.add_time+'</span>\
+					</div>\
+				</div>\
+			</a>\
+		</h1>\
+	</li>';
+	offset++;
+	return html;
+}
+function setDelete(){
+	$('.message-index .tableView').dragshow({
+		title : '<i></i>',
+		cls : 'delBtn',
+		click : function(row){
+			var _this = $(this);
+			$.post('/api/?app=message&act=delete', { id:row.find('a').attr('mid') }, function(){
+				var section = row.parent();
+				if(section.find('li').length==1){
+					location.href = location.href;
+					return;
+				}else{
+					row.slideUp(200, function(){ row.remove() });
+				}
+				_this.delay(90).slideUp(200);
+			});
+		}
+	});
+}
+$(function(){
+	setDelete();
+	$('.message-index').on('click', '.tableView a', function(){
+		var _this = $(this);
+		$.postJSON('/api/?app=message&act=read', { id:_this.attr('mid') }, function(json){
+			if(json.error!=0){ $.overloadError(json.msg);return }
+			_this.find('.view').addClass('d');
+		});
+	});
+	$('.pullRefresh').pullRefresh({
+		header : true,
+		footer : true,
+		footerNoMoreText : '- END -',
+		refresh : function(fn){
+			var _this = this;
+			offset = 0;
+			$.getJSON('/api/?app=message&act=index', function(json){
+				if(json.error!=0){ $.overloadError(json.msg);return }
+				var html = '';
+				if($.isArray(json.data))for(var i=0; i<json.data.length; i++)html += createHtml(json.data[i]);
+				_this.find('.list').html(html);
+				setDelete();
+				fn();
+			});
+		},
+		load : function(fn){
+			var _this = this;
+			$.getJSON('/api/?app=message&act=index', { offset:offset }, function(json){
+				if(json.error!=0){ $.overloadError(json.msg);return }
+				var html = '';
+				if($.isArray(json.data))for(var i=0; i<json.data.length; i++)html += createHtml(json.data[i]);
+				_this.find('.list').append(html);
+				setDelete();
+				fn();
+			});
+		}
+	});
+});
+</script>

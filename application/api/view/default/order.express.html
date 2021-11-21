@@ -1,0 +1,43 @@
+{include file="header.html"}
+<body class="gr">
+
+<div class="navBar">
+	<a class="left" href="javascript:history.go(-1)"><i class="return"></i></a>
+	<div class="titleView-x">物流情况</div>
+</div>
+
+<div class="order-express">
+	<div class="info ge-bottom ge-light">
+		<div class="view">
+			<div {if is_array($data->goods)}style="background-image:url({$data->goods[0]->goods_pic});"{/if}></div>
+			<span>物流公司：{$data->shipping_company}</span>
+			<span>快递单号：{$data->shipping_number}</span>
+		</div>
+	</div>
+	
+	<div class="express ge-top ge-light">
+		<ul>
+			<li>
+				<div class="view">
+					<div class="nav"><span class="ge-right"></span><div></div></div>
+					<div class="content">[收货地址] {$data->province}{if $data->province!=$data->city} {$data->city}{/if} {$data->district} {$data->address}</div>
+				</div>
+			</li>
+			{if is_array($data->express)}
+			{foreach from=$data->express key=k item=g}
+			<li>
+				<div class="view">
+					<div class="time">{$g->day}<span>{$g->hour}</span></div>
+					<div class="nav"><span class="ge-right"></span><div></div></div>
+					<div class="content">{$g->context}</div>
+				</div>
+			</li>
+			{/foreach}
+			{else}
+			<div class="no-record">暂时没有物流信息</div>
+			{/if}
+		</ul>
+	</div>
+</div>
+
+{include file="footer.html"}
