@@ -1,0 +1,1 @@
+a:3:{s:3:"sql";s:76:"SELECT content FROM ws_op_config WHERE  name='GLOBAL_IGNORE_PERMISSION_ACTS'";s:8:"add_time";i:1635734695;s:4:"data";O:8:"stdClass":1:{s:7:"content";s:125:"ckediter_upload,spec,get_shipping,upload_pic,export,change_ext_property,get_grade_price,get_spec_category,change_ext_property";}}

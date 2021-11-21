@@ -1,0 +1,1 @@
+a:3:{s:3:"sql";s:49:"SELECT edition FROM ws_menu WHERE  app='category'";s:8:"add_time";i:1635741349;s:4:"data";a:5:{i:0;O:8:"stdClass":1:{s:7:"edition";s:8:"category";}i:1;O:8:"stdClass":1:{s:7:"edition";s:8:"category";}i:2;O:8:"stdClass":1:{s:7:"edition";s:8:"category";}i:3;O:8:"stdClass":1:{s:7:"edition";s:8:"category";}i:4;O:8:"stdClass":1:{s:7:"edition";s:8:"category";}}}

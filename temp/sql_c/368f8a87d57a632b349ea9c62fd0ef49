@@ -1,0 +1,1 @@
+a:3:{s:3:"sql";s:45:"SELECT facade, template FROM ws_client_facade";s:8:"add_time";i:1636775193;s:4:"data";a:1:{i:0;O:8:"stdClass":2:{s:6:"facade";s:3:"wap";s:8:"template";s:7:"default";}}}

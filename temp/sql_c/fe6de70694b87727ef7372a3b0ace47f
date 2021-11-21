@@ -1,0 +1,1 @@
+a:3:{s:3:"sql";s:101:"SELECT COUNT(*) FROM ws_menu WHERE  app='ad' AND (LOCATE(',edit,', CONCAT(',',act,','))>0 OR act='*')";s:8:"add_time";i:1635734789;s:4:"data";s:1:"1";}
